@@ -5,7 +5,7 @@ import leaderBoard from '../assets/leaderboard.png';
 export default class BootScene extends Phaser.Scene {
   constructor() {
     super({
-      key: 'BootScene'
+      key: 'BootScene',
     });
   }
 
