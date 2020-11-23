@@ -1,8 +1,4 @@
 {
-  "ignorePatterns": [
-    "dist/",
-    "build/"
-  ],
   "env": {
     "browser": true,
     "es6": true,
@@ -19,5 +15,10 @@
     "no-param-reassign": "off",
     "eol-last": "off",
     "arrow-parens": "off"
-  }
+  },
+  "ignorePatterns": [
+    "dist/",
+    "build/",
+    "docs/"
+  ]
 }
