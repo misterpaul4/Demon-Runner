@@ -1,24 +1,23 @@
 {
-	"env": {
-		"browser": true,
-		"es6": true,
-		"jest": true
-	},
-	"parserOptions": {
-		"ecmaVersion": 2018,
-		"sourceType": "module"
-	},
-	"extends": ["airbnb-base"],
-	"rules": {
-		"no-shadow": "off",
-		"no-param-reassign": "off",
-		"eol-last": "off",
-		"arrow-parens": "off",
-		"object-curly-newline": "off"
-	},
-	"ignorePatterns": [
-		"dist/",
-		"build/",
-        "docs/"
-	]
+  "ignorePatterns": [
+    "dist/",
+    "build/"
+  ],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jest": true
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "extends": ["airbnb-base"],
+  "rules": {
+    "no-shadow": "off",
+    "no-param-reassign": "off",
+    "eol-last": "off",
+    "arrow-parens": "off"
+  }
 }
