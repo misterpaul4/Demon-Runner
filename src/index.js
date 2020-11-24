@@ -1,17 +1,34 @@
 import Phaser from 'phaser';
 import BootScene from './scenes/bootScene';
 import PreloaderScene from './scenes/preloaderScene';
-import titleScene from './scenes/titleScene';
+import TitleScene from './scenes/titleScene';
+import GameScene from './scenes/gameScene';
 
 const config = {
   type: Phaser.AUTO,
   width: 800,
   height: 450,
+
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: {
+        y: 300,
+      },
+      debug: false,
+    },
+  },
+
   scene: [
     BootScene,
     PreloaderScene,
-    titleScene,
+    TitleScene,
+    GameScene,
   ],
 };
 
 const game = new Phaser.Game(config);
+
+export default {
+  game,
+};
