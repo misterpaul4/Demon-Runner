@@ -1,11 +1,18 @@
 import Phaser from 'phaser';
 import setMouseScale from '../utils/hoverEffect';
+import ground from '../assets/ground.png';
+import player from '../assets/character.png';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
     super({
       key: 'TitleScene',
     });
+  }
+
+  preload() {
+    this.load.image('ground', ground);
+    this.load.image('player', player);
   }
 
   create() {
