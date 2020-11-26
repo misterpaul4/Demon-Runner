@@ -1,18 +1,13 @@
 import Phaser from 'phaser';
 
-// TODO: add animation for player spritesheet
-// TODO: add jumping image and animation to spritesheet
-
-let player;
-let cursors;
-
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super({
       key: 'GameScene',
     });
-  }
 
+    this.jumps = 0;
+  }
   // preload() {
   //   this.load.image('ground', ground);
   // }
@@ -20,17 +15,35 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.add.image(400, 225, 'background');
     const platforms = this.physics.add.staticGroup();
-    const ground = platforms.create(400, 420, 'ground');
+    platforms.create(405, 420, 'ground');
 
-    const {
-      body,
-    } = ground;
-    body.updateFromGameObject();
+    this.stones = this.physics.add.group({
+      key: 'stone',
+      setXY: {
+        x: 300,
+        y: 370,
+      },
+      allowGravity: false,
+    });
 
-    player = this.physics.add.sprite(80, 180, 'player').setScale(0.4);
-    this.physics.add.collider(platforms, player);
+    // this.stones = platforms.create(300, 370, 'stone');
+    // const {
+    //   body,
+    // } = ground;
+    // body.updateFromGameObject();
 
-    player.setCollideWorldBounds(true);
+    this.player = this.physics.add.sprite(80, 180, 'player').setScale(0.1);
+    this.physics.add.collider(platforms, this.player);
+    // this.physics.add.collider(this.player, this.stone, this.hitStone(), null, this);
+    this.player.setBounce(0.15);
+
+    this.player.setCollideWorldBounds(true);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+
+    // this.player.body.checkCollision.up = false;
+    // this.player.body.checkCollision.left = false;
+    // this.player.body.checkCollision.right = false;
 
     this.anims.create({
       key: 'run',
@@ -52,13 +65,24 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
-    cursors = this.input.keyboard.createCursorKeys();
-
-    if ((cursors.space.isDown || cursors.up.isDown) && player.body.touching.down) {
-      player.setVelocityY(-550);
-      player.anims.play('jump', true);
-    } else if (player.body.touching.down) {
-      player.anims.play('run', true);
+    if ((this.cursors.space.isDown || this.cursors.up.isDown) && this.player.body.touching.down) {
+      this.jump();
+      // this.player.setVelocityX(70);
+    } else if (this.player.body.touching.down) {
+      this.player.anims.play('run', true);
+      // this.player.setVelocityX(70);
     }
   }
+
+  jump() {
+    this.player.setVelocityY(-450);
+    this.player.anims.play('jump', true);
+  }
+
+  // static hitStone() {
+  //   this.physics.pause();
+  //   this.player.setTint(0xff0000);
+  //   this.player.anims.play('jump');
+  //   console.log('dead');
+  // }
 }
