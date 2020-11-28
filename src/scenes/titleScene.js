@@ -3,6 +3,7 @@ import setMouseScale from '../utils/hoverEffect';
 import ground from '../assets/ground.png';
 import player from '../assets/characterSprite2.png';
 import stone from '../assets/stone.png';
+import platform from '../assets/platform.png';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +15,7 @@ export default class TitleScene extends Phaser.Scene {
   preload() {
     this.load.image('ground', ground);
     this.load.image('stone', stone);
+    this.load.image('platform', platform);
     this.load.spritesheet('player', player, {
       frameWidth: 500,
       frameHeight: 730,
