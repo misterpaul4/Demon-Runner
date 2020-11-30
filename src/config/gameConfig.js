@@ -1,5 +1,6 @@
 const gameOptions = {
-  groundSpace: 150,
+  groundSpaceRange: [100, 200],
+  groundSizeRange: [50, 801],
   playerGravity: 900,
   jumpForce: 400,
   jumps: 2,
