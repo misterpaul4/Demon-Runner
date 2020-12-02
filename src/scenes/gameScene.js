@@ -61,26 +61,41 @@ export default class GameScene extends Phaser.Scene {
     // this.platforms.outOfBoundsKill = true;
     // console.log(`first platform = ${this.platforms.getChildren()[1].x}`);
 
-    for (let i = 0; i < 20; i += 1) {
-      this.addPlatform();
+    this.time.addEvent({
+      delay: 2000,
+      callback: this.createPlatform,
+      callbackScope: this,
+      loop: true,
+    });
+
+    // create 3 platforms
+    for (let i = 0; i < 5; i += 1) {
+      this.createPlatform();
     }
   }
 
   update() {
     this.movement();
-
-    // check whether to create a platform or reuse
+    this.removePlatform();
   }
 
-  addPlatform() {
-    // if platforms are available
-    // if (this.platforms.getLength()) {
-    //   // get first platform
-    //   const platform = this.platforms.getChildren()[0];
-    //   // change position of the platform
-    //   platform.x = posX;
-    // }
-    //  create platforms on the fly if there are none
+  // recyclePlatform() {
+  //   const platform = this.platforms.getChildren()[0];
+  //   // this.removePlatform(platform);
+  //   this.createPlatform();
+  //   console.log(this.platforms.getLength());
+  // }
+
+  removePlatform() {
+    this.platforms.getChildren().forEach((platform) => {
+      if (this.player.x > (platform.x + 1000)) {
+        this.platforms.killAndHide(platform);
+        this.platforms.remove(platform);
+      }
+    });
+  }
+
+  createPlatform() {
     const platform = this.platforms.create(this.groundX, this.groundY, 'ground').setOrigin(0);
     platform.displayWidth = Phaser.Math.Between(
       settings.groundSizeRange[0], settings.groundSizeRange[1],
