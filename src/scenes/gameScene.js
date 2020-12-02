@@ -62,33 +62,45 @@ export default class GameScene extends Phaser.Scene {
     // console.log(`first platform = ${this.platforms.getChildren()[1].x}`);
 
     this.time.addEvent({
-      delay: 2000,
-      callback: this.createPlatform,
+      delay: 5000,
+      callback: this.ravenAttack,
       callbackScope: this,
       loop: true,
     });
 
-    // create 3 platforms
-    for (let i = 0; i < 5; i += 1) {
+    // create 4 platforms
+    for (let i = 0; i < 4; i += 1) {
       this.createPlatform();
     }
+
+    this.bird = this.physics.add.sprite(900, 100, 'bird').setScale(0.13);
+    this.bird.body.setAllowGravity(false);
+    this.anims.create({
+      key: 'fly',
+      frames: this.anims.generateFrameNumbers('bird', {
+        start: 0,
+        end: 10,
+      }),
+      frameRate: 8,
+      repeat: -1,
+    });
+    this.bird.setVelocityX(-(settings.gameSpeed - 50));
   }
 
   update() {
     this.movement();
-    this.removePlatform();
+    this.checkPlatform();
   }
 
-  // recyclePlatform() {
-  //   const platform = this.platforms.getChildren()[0];
-  //   // this.removePlatform(platform);
-  //   this.createPlatform();
-  //   console.log(this.platforms.getLength());
-  // }
+  ravenAttack() {
+    this.bird.x = this.player.x + 1000;
+    this.bird.y = Phaser.Math.Between(100, 380);
+  }
 
-  removePlatform() {
+  checkPlatform() {
     this.platforms.getChildren().forEach((platform) => {
       if (this.player.x > (platform.x + 1000)) {
+        this.createPlatform();
         this.platforms.killAndHide(platform);
         this.platforms.remove(platform);
       }
@@ -96,21 +108,22 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createPlatform() {
-    const platform = this.platforms.create(this.groundX, this.groundY, 'ground').setOrigin(0);
-    platform.displayWidth = Phaser.Math.Between(
+    this.newPlatform = this.platforms.create(this.groundX, this.groundY, 'ground').setOrigin(0);
+    this.newPlatform.displayWidth = Phaser.Math.Between(
       settings.groundSizeRange[0], settings.groundSizeRange[1],
     );
-    this.groundX += (platform.displayWidth + Phaser.Math.Between(
+    this.groundX += (this.newPlatform.displayWidth + Phaser.Math.Between(
       settings.groundSpaceRange[0], settings.groundSpaceRange[1],
     ));
 
     const {
       body,
-    } = platform;
+    } = this.newPlatform;
     body.updateFromGameObject();
   }
 
   movement() {
+    this.bird.anims.play('fly', true);
     if (this.player.body.touching.down) {
       this.player.anims.play('run', true);
       this.player.clearTint();
