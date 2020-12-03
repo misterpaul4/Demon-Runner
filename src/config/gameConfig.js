@@ -6,7 +6,7 @@ const gameOptions = {
   jumps: 2,
   gameWidth: 800,
   gameHeight: 450,
-  gameSpeed: 200,
+  gameSpeed: 300,
 };
 
 export default gameOptions;

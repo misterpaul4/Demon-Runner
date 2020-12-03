@@ -12,6 +12,23 @@ export default class GameScene extends Phaser.Scene {
     this.add.image(400, 225, 'background').setScrollFactor(0, 1);
     this.platforms = this.physics.add.staticGroup();
 
+    // score label
+    this.scoreLabel = this.add.text(30, 20, 'Time:\t\t\t0', {
+      font: '30px Arial',
+      fill: '#fff',
+    }).setScrollFactor(0, 1);
+
+    // initialize score
+    this.score = 0;
+
+    // timer to increase score
+    this.timer = this.time.addEvent({
+      delay: 1000,
+      callback: this.updateTimer,
+      callbackScope: this,
+      loop: true,
+    });
+
     this.groundY = 400;
     this.groundX = 900;
 
@@ -23,17 +40,44 @@ export default class GameScene extends Phaser.Scene {
     this.player.setBounce(0.15);
     // this.player.setCollideWorldBounds(true);
 
-    this.cursors = this.input.keyboard.createCursorKeys();
-
-    this.physics.add.collider(this.platforms, this.player);
-    // this.physics.add.collider(this.platforms, this.stones);
-    // this.physics.add.collider(this.stones, this.player, this.hitStone(), null, this);
-
     // camera.startFollow(gameObject, roundPx, lerpX, lerpY, offsetX, offsetY);
     this.cameras.main.startFollow(this.player, false, 1, 0, -200, 125);
 
     this.player.setVelocityX(settings.gameSpeed);
 
+    // set space key and up-arrow key for jumping
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.input.keyboard.on('keydown-SPACE', this.jump, this);
+    this.input.keyboard.on('keydown-UP', this.jump, this);
+
+    // initialize number of jumps for the player
+    this.player.jumps = settings.jumps;
+
+    // timer for raven attack
+    this.time.addEvent({
+      delay: 5000,
+      callback: this.ravenAttack,
+      callbackScope: this,
+      loop: true,
+    });
+
+    // create 4 platforms
+    for (let i = 0; i < 4; i += 1) {
+      this.createPlatform();
+    }
+
+    // RAVEN
+    this.bird = this.physics.add.sprite(900, 100, 'bird').setScale(0.13);
+    this.bird.body.setAllowGravity(false);
+
+    // set raven velocity 50 dist/s less than player speed
+    this.bird.setVelocityX(-(settings.gameSpeed - 50));
+
+    // set collisions
+    this.physics.add.collider(this.platforms, this.player);
+    this.physics.add.collider(this.bird, this.player, this.hitRaven, null, this);
+
+    // player animation
     this.anims.create({
       key: 'run',
       frames: this.anims.generateFrameNumbers('player', {
@@ -52,29 +96,7 @@ export default class GameScene extends Phaser.Scene {
       }],
     });
 
-    this.input.keyboard.on('keydown-SPACE', this.jump, this);
-    this.input.keyboard.on('keydown-UP', this.jump, this);
-
-    this.player.jumps = settings.jumps;
-
-    // this.platforms.checkWorldBounds = true;
-    // this.platforms.outOfBoundsKill = true;
-    // console.log(`first platform = ${this.platforms.getChildren()[1].x}`);
-
-    this.time.addEvent({
-      delay: 5000,
-      callback: this.ravenAttack,
-      callbackScope: this,
-      loop: true,
-    });
-
-    // create 4 platforms
-    for (let i = 0; i < 4; i += 1) {
-      this.createPlatform();
-    }
-
-    this.bird = this.physics.add.sprite(900, 100, 'bird').setScale(0.13);
-    this.bird.body.setAllowGravity(false);
+    // bird animation
     this.anims.create({
       key: 'fly',
       frames: this.anims.generateFrameNumbers('bird', {
@@ -84,7 +106,6 @@ export default class GameScene extends Phaser.Scene {
       frameRate: 8,
       repeat: -1,
     });
-    this.bird.setVelocityX(-(settings.gameSpeed - 50));
   }
 
   update() {
@@ -94,7 +115,7 @@ export default class GameScene extends Phaser.Scene {
 
   ravenAttack() {
     this.bird.x = this.player.x + 1000;
-    this.bird.y = Phaser.Math.Between(100, 380);
+    this.bird.y = Phaser.Math.Between(100, 300);
   }
 
   checkPlatform() {
@@ -140,8 +161,18 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  hitStone() {
-    // this.physics.pause();
-    this.player.setTint(0xff1000);
+  hitRaven() {
+    this.bird.setTint(0xff1000);
+    this.die();
+  }
+
+  updateTimer() {
+    this.score += 1;
+    this.scoreLabel.setText(`Time:\t\t\t${this.score}`);
+  }
+
+  die() {
+    this.physics.pause();
+    this.timer.paused = true;
   }
 }

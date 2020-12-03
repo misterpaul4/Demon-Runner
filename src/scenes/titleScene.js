@@ -1,9 +1,7 @@
 import Phaser from 'phaser';
 import setMouseScale from '../utils/hoverEffect';
 import ground from '../assets/ground.png';
-import player from '../assets/characterSprite.png';
-import stone from '../assets/stone.png';
-import platform from '../assets/platform.png';
+import player from '../assets/characterSprite2.png';
 import bird from '../assets/birdSprite.png';
 
 export default class TitleScene extends Phaser.Scene {
@@ -15,11 +13,9 @@ export default class TitleScene extends Phaser.Scene {
 
   preload() {
     this.load.image('ground', ground);
-    this.load.image('stone', stone);
-    this.load.image('platform', platform);
     this.load.spritesheet('player', player, {
       frameWidth: 500,
-      frameHeight: 730,
+      frameHeight: 632,
     });
     this.load.spritesheet('bird', bird, {
       frameHeight: 416,
