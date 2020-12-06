@@ -3,6 +3,7 @@ import setMouseScale from '../utils/hoverEffect';
 import ground from '../assets/ground.png';
 import player from '../assets/characterSprite2.png';
 import bird from '../assets/birdSprite.png';
+import jumpSound from '../assets/sound/jump.mp3';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -12,6 +13,7 @@ export default class TitleScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio('jumpSound', jumpSound);
     this.load.image('ground', ground);
     this.load.spritesheet('player', player, {
       frameWidth: 500,

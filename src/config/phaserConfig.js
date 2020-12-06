@@ -16,7 +16,7 @@ const config = {
       gravity: {
         y: settings.playerGravity,
       },
-      debug: true,
+      debug: false,
     },
   },
 
