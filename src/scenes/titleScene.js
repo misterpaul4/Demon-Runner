@@ -5,7 +5,11 @@ import player from '../assets/characterSprite2.png';
 import bird from '../assets/birdSprite.png';
 import jumpSound from '../assets/sound/jump.mp3';
 import birdSound from '../assets/sound/crow.mp3';
-import '../style.css';
+import runSound from '../assets/sound/footstep.mp3';
+import hitGroundSound from '../assets/sound/hitGround.mp3';
+import gameOverSound from '../assets/sound/gameOver.mp3';
+// import '../style.css';
+import username from '../utils/usernameForm';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -17,6 +21,9 @@ export default class TitleScene extends Phaser.Scene {
   preload() {
     this.load.audio('jumpSound', jumpSound);
     this.load.audio('birdSound', birdSound);
+    this.load.audio('runSound', runSound);
+    this.load.audio('hitGroundSound', hitGroundSound);
+    this.load.audio('gameOverSound', gameOverSound);
 
     this.load.image('ground', ground);
     this.load.spritesheet('player', player, {
@@ -41,19 +48,18 @@ export default class TitleScene extends Phaser.Scene {
     setMouseScale(startBtn, 1.05);
     setMouseScale(leaderboard, 1.05);
 
+    const usname = localStorage.getItem('username');
+
+    if (usname) {
+      username.display(usname, this);
+    } else {
+      username.enter(this);
+    }
+
     startBtn.on('pointerup', () => {
-      this.scene.start('GameScene');
+      if (localStorage.getItem('username')) {
+        this.scene.start('GameScene');
+      }
     });
-
-    const formContainer = document.createElement('form');
-    const userInput = document.createElement('input');
-    const submitBtn = document.createElement('input');
-    userInput.id = 'username';
-    userInput.placeholder = 'username';
-    submitBtn.type = 'submit';
-
-    formContainer.appendChild(userInput);
-    formContainer.appendChild(submitBtn);
-    document.body.appendChild(formContainer);
   }
 }

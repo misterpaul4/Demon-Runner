@@ -10,6 +10,8 @@ form {
   background-color: #2d2b2e;
   color: white;
   display: flex;
+  opacity: 1;
+  transition: opacity 500ms;
 }
 
 body {

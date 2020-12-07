@@ -21,6 +21,13 @@ export default class GameScene extends Phaser.Scene {
     // initialize score
     this.score = 0;
 
+    // get user best score
+    this.bestScore = localStorage.getItem('best score');
+    this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
+      font: '30px Arial',
+      fill: '#fff',
+    }).setScrollFactor(0, 1);
+
     // timer to increase score
     this.timer = this.time.addEvent({
       delay: 1000,
@@ -29,6 +36,7 @@ export default class GameScene extends Phaser.Scene {
       loop: true,
     });
 
+    // initial ground position
     this.groundY = 400;
     this.groundX = 900;
 
@@ -43,7 +51,11 @@ export default class GameScene extends Phaser.Scene {
     // camera.startFollow(gameObject, roundPx, lerpX, lerpY, offsetX, offsetY);
     this.cameras.main.startFollow(this.player, false, 1, 0, -200, 125);
 
+    // set player velocity
     this.player.setVelocityX(settings.gameSpeed);
+
+    // checks if player landed on the floor
+    this.player.hitGround = false;
 
     // set space key and up-arrow key for jumping
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -57,7 +69,7 @@ export default class GameScene extends Phaser.Scene {
 
     // timer for raven attack
     this.timer2 = this.time.addEvent({
-      delay: 4000,
+      delay: 3000,
       callback: this.ravenAttack,
       callbackScope: this,
       loop: true,
@@ -76,7 +88,7 @@ export default class GameScene extends Phaser.Scene {
     this.bird.setVelocityX(-(settings.gameSpeed - 50));
 
     // set collisions
-    this.physics.add.collider(this.platforms, this.player);
+    this.physics.add.collider(this.platforms, this.player, this.hitFloor, null, this);
     this.physics.add.collider(this.bird, this.player, this.hitRaven, null, this);
 
     // player animation
@@ -107,6 +119,17 @@ export default class GameScene extends Phaser.Scene {
       }),
       frameRate: 8,
       repeat: -1,
+    });
+
+    this.timer3 = this.time.addEvent({
+      delay: 285,
+      callback: () => {
+        if (this.player.body.touching.down) {
+          this.sound.play('runSound');
+        }
+      },
+      callbackScope: this,
+      loop: true,
     });
   }
 
@@ -167,12 +190,20 @@ export default class GameScene extends Phaser.Scene {
       this.player.setTint(0xff0000);
       this.player.jumps -= 1;
       this.sound.play('jumpSound');
+      this.player.hitGround = true;
     }
   }
 
   hitRaven() {
     this.bird.setTint(0xff1000);
     this.die();
+  }
+
+  hitFloor() {
+    if (this.player.hitGround) {
+      this.sound.play('hitGroundSound');
+      this.player.hitGround = false;
+    }
   }
 
   updateTimer() {
@@ -184,5 +215,10 @@ export default class GameScene extends Phaser.Scene {
     this.physics.pause();
     this.timer.paused = true;
     this.timer2.paused = true;
+    this.timer3.paused = true;
+    this.player.anims.stop();
+    if (this.score > Number(this.bestScore)) {
+      localStorage.setItem('best score', this.score);
+    }
   }
 }
