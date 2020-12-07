@@ -4,6 +4,8 @@ import ground from '../assets/ground.png';
 import player from '../assets/characterSprite2.png';
 import bird from '../assets/birdSprite.png';
 import jumpSound from '../assets/sound/jump.mp3';
+import birdSound from '../assets/sound/crow.mp3';
+import '../style.css';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +16,8 @@ export default class TitleScene extends Phaser.Scene {
 
   preload() {
     this.load.audio('jumpSound', jumpSound);
+    this.load.audio('birdSound', birdSound);
+
     this.load.image('ground', ground);
     this.load.spritesheet('player', player, {
       frameWidth: 500,
@@ -27,7 +31,8 @@ export default class TitleScene extends Phaser.Scene {
 
   create() {
     this.add.image(400, 225, 'background');
-    this.add.text(350, 90, 'Demon Runner');
+    // const gameTitle = this.add.text(230, 20, 'Demon Runner');
+    // gameTitle.setFontSize('50px');
 
     const startBtn = this.add.image(400, 150, 'startBtn');
     const leaderboard = this.add.image(400, 300, 'leaderboard');
@@ -39,5 +44,16 @@ export default class TitleScene extends Phaser.Scene {
     startBtn.on('pointerup', () => {
       this.scene.start('GameScene');
     });
+
+    const formContainer = document.createElement('form');
+    const userInput = document.createElement('input');
+    const submitBtn = document.createElement('input');
+    userInput.id = 'username';
+    userInput.placeholder = 'username';
+    submitBtn.type = 'submit';
+
+    formContainer.appendChild(userInput);
+    formContainer.appendChild(submitBtn);
+    document.body.appendChild(formContainer);
   }
 }

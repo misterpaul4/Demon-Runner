@@ -53,8 +53,10 @@ export default class GameScene extends Phaser.Scene {
     // initialize number of jumps for the player
     this.player.jumps = settings.jumps;
 
+    this.player.body.pushable = false;
+
     // timer for raven attack
-    this.time.addEvent({
+    this.timer2 = this.time.addEvent({
       delay: 4000,
       callback: this.ravenAttack,
       callbackScope: this,
@@ -111,11 +113,17 @@ export default class GameScene extends Phaser.Scene {
   update() {
     this.movement();
     this.checkPlatform();
+    // check if player fell down or is moving backward due to impact
+    if (this.player.y > 480 || this.player.body.velocity.x < settings.gameSpeed) {
+      this.die();
+    }
   }
 
   ravenAttack() {
+    // reposition raven position
     this.bird.x = this.player.x + 1000;
-    this.bird.y = Phaser.Math.Between(150, 300);
+    this.bird.y = Phaser.Math.Between(150, 370);
+    this.sound.play('birdSound');
   }
 
   checkPlatform() {
@@ -175,5 +183,6 @@ export default class GameScene extends Phaser.Scene {
   die() {
     this.physics.pause();
     this.timer.paused = true;
+    this.timer2.paused = true;
   }
 }
