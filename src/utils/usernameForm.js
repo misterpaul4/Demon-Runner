@@ -1,5 +1,6 @@
 import '../style.css';
 import settings from '../config/gameConfig';
+import { fetchUserBestScore } from './leaderBoardAPI';
 
 export default (() => {
   const display = (username, reff, newUser = ' back ') => {
@@ -12,22 +13,29 @@ export default (() => {
     const formContainer = document.createElement('form');
     const userInput = document.createElement('input');
     const submitBtn = document.createElement('input');
+    const usernameAlert = document.createElement('p');
+
     userInput.id = 'username';
     userInput.placeholder = 'username';
     submitBtn.type = 'submit';
+    usernameAlert.className = 'username-alert';
+
+    usernameAlert.textContent = '* Please enter your username';
 
     formContainer.appendChild(userInput);
     formContainer.appendChild(submitBtn);
+    formContainer.appendChild(usernameAlert);
     document.body.appendChild(formContainer);
 
     submitBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const username = userInput.value;
       localStorage.setItem('username', username);
-      localStorage.setItem('best score', '0');
-      formContainer.style.opacity = '0';
+      // get best score
+      const bestScore = fetchUserBestScore(username);
+      localStorage.setItem('best score', `${bestScore}`);
 
-      // validate
+      formContainer.style.display = 'none';
       display(username, reff, ' ');
     });
   };

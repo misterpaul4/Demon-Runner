@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import settings from '../config/gameConfig';
+import { uploadScore } from '../utils/leaderBoardAPI';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -29,7 +30,7 @@ export default class GameScene extends Phaser.Scene {
     }).setScrollFactor(0, 1);
 
     // timer to increase score
-    this.timer = this.time.addEvent({
+    this.time.addEvent({
       delay: 1000,
       callback: this.updateTimer,
       callbackScope: this,
@@ -68,7 +69,7 @@ export default class GameScene extends Phaser.Scene {
     this.player.body.pushable = false;
 
     // timer for raven attack
-    this.timer2 = this.time.addEvent({
+    this.time.addEvent({
       delay: 3000,
       callback: this.ravenAttack,
       callbackScope: this,
@@ -121,7 +122,8 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    this.timer3 = this.time.addEvent({
+    // timer for running sound
+    this.time.addEvent({
       delay: 285,
       callback: () => {
         if (this.player.body.touching.down) {
@@ -150,6 +152,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   checkPlatform() {
+    // destroy and reposition the ground platform
     this.platforms.getChildren().forEach((platform) => {
       if (this.player.x > (platform.x + 1000)) {
         this.createPlatform();
@@ -179,6 +182,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.player.body.touching.down) {
       this.player.anims.play('run', true);
       this.player.clearTint();
+      // reset jumps
       this.player.jumps = settings.jumps;
     }
   }
@@ -212,13 +216,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   die() {
-    this.physics.pause();
-    this.timer.paused = true;
-    this.timer2.paused = true;
-    this.timer3.paused = true;
-    this.player.anims.stop();
+    this.scene.pause('GameScene');
+    this.sound.play('gameOverSound');
+
+    // update bestscore
     if (this.score > Number(this.bestScore)) {
       localStorage.setItem('best score', this.score);
+      uploadScore(localStorage.getItem('username'), this.score);
     }
   }
 }

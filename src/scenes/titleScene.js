@@ -8,7 +8,6 @@ import birdSound from '../assets/sound/crow.mp3';
 import runSound from '../assets/sound/footstep.mp3';
 import hitGroundSound from '../assets/sound/hitGround.mp3';
 import gameOverSound from '../assets/sound/gameOver.mp3';
-// import '../style.css';
 import username from '../utils/usernameForm';
 
 export default class TitleScene extends Phaser.Scene {
@@ -38,8 +37,6 @@ export default class TitleScene extends Phaser.Scene {
 
   create() {
     this.add.image(400, 225, 'background');
-    // const gameTitle = this.add.text(230, 20, 'Demon Runner');
-    // gameTitle.setFontSize('50px');
 
     const startBtn = this.add.image(400, 150, 'startBtn');
     const leaderboard = this.add.image(400, 300, 'leaderboard');
@@ -59,6 +56,10 @@ export default class TitleScene extends Phaser.Scene {
     startBtn.on('pointerup', () => {
       if (localStorage.getItem('username')) {
         this.scene.start('GameScene');
+      } else {
+        // display warning
+        const alertBox = document.querySelector('.username-alert');
+        alertBox.classList.add('show-warning');
       }
     });
   }
