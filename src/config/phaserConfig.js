@@ -4,6 +4,7 @@ import PreloaderScene from '../scenes/preloaderScene';
 import TitleScene from '../scenes/titleScene';
 import GameScene from '../scenes/gameScene';
 import GameOverScene from '../scenes/gameOverScene';
+import RankScene from '../scenes/rankScene';
 import settings from './gameConfig';
 
 const config = {
@@ -27,6 +28,7 @@ const config = {
     TitleScene,
     GameScene,
     GameOverScene,
+    RankScene,
   ],
 };
 

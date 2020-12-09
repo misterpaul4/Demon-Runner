@@ -7,6 +7,7 @@ const gameOptions = {
   gameWidth: 800,
   gameHeight: 450,
   gameSpeed: 350,
+  ranks: 10,
 };
 
 export default gameOptions;

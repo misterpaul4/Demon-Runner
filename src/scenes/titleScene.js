@@ -12,6 +12,7 @@ import username from '../utils/usernameForm';
 import gameOverImg from '../assets/gameOver.png';
 import restartBtn from '../assets/restart_btn.png';
 import quitBtn from '../assets/quit_btn.png';
+import backBtn from '../assets/back_btn.png';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -31,6 +32,7 @@ export default class TitleScene extends Phaser.Scene {
     this.load.image('gameOverImage', gameOverImg);
     this.load.image('restartBtn', restartBtn);
     this.load.image('quitBtn', quitBtn);
+    this.load.image('backBtn', backBtn);
 
     this.load.spritesheet('player', player, {
       frameWidth: 500,
@@ -46,11 +48,11 @@ export default class TitleScene extends Phaser.Scene {
     this.add.image(400, 225, 'background');
 
     const startBtn = this.add.image(400, 150, 'startBtn');
-    const leaderboard = this.add.image(400, 300, 'leaderboard');
+    const leaderboardBtn = this.add.image(400, 300, 'leaderboard');
 
     // Add hover effects
     setMouseScale(startBtn, 1.05);
-    setMouseScale(leaderboard, 1.05);
+    setMouseScale(leaderboardBtn, 1.05);
 
     const usname = localStorage.getItem('username');
 
@@ -69,5 +71,10 @@ export default class TitleScene extends Phaser.Scene {
         alertBox.classList.add('show-warning');
       }
     });
+
+    leaderboardBtn.on('pointerup', () => {
+      this.scene.start('RankScene');
+    });
+
   }
 }
