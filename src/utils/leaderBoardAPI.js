@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+
 const baseUrl = 'https://us-central1-js-capstone-backend.cloudfunctions.net/api/games/vNNYorW3U7bLbVIMpbN7/scores/';
 
 const uploadScore = async (username, score) => {

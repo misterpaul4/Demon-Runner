@@ -1,4 +1,4 @@
-export default function(element, scale) {
+export default (element, scale) => {
   element.setInteractive();
   element.on('pointerover', () => {
     element.setScale(scale);
@@ -7,4 +7,4 @@ export default function(element, scale) {
   element.on('pointerout', () => {
     element.setScale(1);
   });
-}
+};

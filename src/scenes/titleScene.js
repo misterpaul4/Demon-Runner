@@ -75,6 +75,5 @@ export default class TitleScene extends Phaser.Scene {
     leaderboardBtn.on('pointerup', () => {
       this.scene.start('RankScene');
     });
-
   }
 }
