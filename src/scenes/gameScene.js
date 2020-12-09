@@ -24,7 +24,7 @@ export default class GameScene extends Phaser.Scene {
 
     // get user best score
     this.bestScore = localStorage.getItem('best score');
-    this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
+    this.bestScoreLabel = this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
       font: '30px Arial',
       fill: '#fff',
     }).setScrollFactor(0, 1);
@@ -213,16 +213,21 @@ export default class GameScene extends Phaser.Scene {
   updateTimer() {
     this.score += 1;
     this.scoreLabel.setText(`Time:\t\t\t${this.score}`);
+    // check for new best
+    if (this.score > Number(this.bestScore)) {
+      this.bestScoreLabel.setText(`Best Time:\t\t\t${this.score}`);
+    }
   }
 
   die() {
-    this.scene.pause('GameScene');
     this.sound.play('gameOverSound');
+    this.scene.pause('GameScene');
+    this.scene.launch('GameOverScene', this);
 
     // update bestscore
-    if (this.score > Number(this.bestScore)) {
-      localStorage.setItem('best score', this.score);
-      uploadScore(localStorage.getItem('username'), this.score);
-    }
+    // if (this.score > Number(this.bestScore)) {
+    //   localStorage.setItem('best score', this.score);
+    //   uploadScore(localStorage.getItem('username'), this.score);
+    // }
   }
 }

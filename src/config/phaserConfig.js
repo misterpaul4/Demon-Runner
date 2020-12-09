@@ -3,6 +3,7 @@ import BootScene from '../scenes/bootScene';
 import PreloaderScene from '../scenes/preloaderScene';
 import TitleScene from '../scenes/titleScene';
 import GameScene from '../scenes/gameScene';
+import GameOverScene from '../scenes/gameOverScene';
 import settings from './gameConfig';
 
 const config = {
@@ -25,6 +26,7 @@ const config = {
     PreloaderScene,
     TitleScene,
     GameScene,
+    GameOverScene,
   ],
 };
 

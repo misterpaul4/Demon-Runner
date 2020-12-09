@@ -9,6 +9,9 @@ import runSound from '../assets/sound/footstep.mp3';
 import hitGroundSound from '../assets/sound/hitGround.mp3';
 import gameOverSound from '../assets/sound/gameOver.mp3';
 import username from '../utils/usernameForm';
+import gameOverImg from '../assets/gameOver.png';
+import restartBtn from '../assets/restart_btn.png';
+import quitBtn from '../assets/quit_btn.png';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -25,6 +28,10 @@ export default class TitleScene extends Phaser.Scene {
     this.load.audio('gameOverSound', gameOverSound);
 
     this.load.image('ground', ground);
+    this.load.image('gameOverImage', gameOverImg);
+    this.load.image('restartBtn', restartBtn);
+    this.load.image('quitBtn', quitBtn);
+
     this.load.spritesheet('player', player, {
       frameWidth: 500,
       frameHeight: 632,
