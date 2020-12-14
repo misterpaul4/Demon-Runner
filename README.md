@@ -34,7 +34,7 @@ To run test, run the command `npm run test`. You can add more test in the `./tes
 
 ## Technical Details
 
-# scenes
+### scenes
 
 There are 5 Phaser scenes in this game.
 - The boot scene loads the game background.
@@ -44,18 +44,18 @@ There are 5 Phaser scenes in this game.
 - The rank scene dosplays the top 10 highest scores.
 - The gameover scene is launched when the player is hit by a bird or falls down from the platform. This scene contains the a button to restart the game & also to quit the game
 
-# characters
+### characters
 
 - Main character: A demon with the ability to levitate
 - Villain: A raven that attacks every few seconds
 
-# Timers
+### Timers
 
 - The score increases every second
 - The Raven attacks every 3 seconds
 - The footstep sound is played every 285ms
 
-# Physics
+### Physics
 
 - Arcade physics engine is used
 - The Raven's velocity is 50 units less than the player's velocity
