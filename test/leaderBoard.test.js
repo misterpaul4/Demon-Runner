@@ -20,6 +20,14 @@ describe('fetching user highest score', () => {
     uploadScore('joe', 7).catch(() => {});
     fetchUserBestScore('joe').then(score => {
       expect(score).toBe(8);
+      expect(score).not.Be(2);
+    }).catch(() => {});
+  });
+
+  test('player score is initialized as 0 if not found in the leaderboard API service', () => {
+    fetchUserBestScore('joe789456789').then(score => {
+      expect(score).toBe(0);
+      expect(score > 0).not.Be(true);
     }).catch(() => {});
   });
 });

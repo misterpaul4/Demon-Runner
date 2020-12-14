@@ -56,6 +56,7 @@ There are 5 Phaser scenes in this game.
 
 # Physics
 
+- Arcade physics engine is used
 - The Raven's velocity is 50 units less than the player's velocity
 - The Raven changes position every 3 seconds, 1000 units ahead of the player's position at that particular time. The y coordinates of the Raven is generated randomly.
 - There are 5 total platforms that are recycled throughtout the game
