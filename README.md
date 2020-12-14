@@ -21,12 +21,14 @@ Demon Runner is a 2D endless runner game built with popular game framework Phase
 
 Start by entering your username and then click on "START" to start the game. avoid Ravens and falling off the ground by pressing the spacebar key or UP ARROW key to jump. Click on the button underneath the start button to see if you made it to the TOP TEN :blush:
 
-
 ## Getting Started
 
 - Clone the repository to get a local copy `git clone https://github.com/misterpaul4/Demon-Runner`
 - In the project's directory, install dependencies by running `npm install`
 - `npm run server` to start the game. This will launch your default browser. Click on the folder name "docs".
+
+## Run Test
+To run test, run the command `npm run test`. You can add more test in the `./test directory`.
 
 ## Authors
 

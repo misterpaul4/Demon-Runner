@@ -7,6 +7,9 @@ module.exports = {
     filename: 'main.js',
     path: path.resolve(__dirname, 'docs'),
   },
+  devServer: {
+    open: true,
+  },
   module: {
     rules: [{
       test: /\.css?$/,
