@@ -49,13 +49,13 @@ There are 5 Phaser scenes in this game.
 - Main character: A demon with the ability to levitate
 - Villain: A raven that attacks every few seconds
 
-### Timers
+### timers
 
 - The score increases every second
 - The Raven attacks every 3 seconds
 - The footstep sound is played every 285ms
 
-### Physics
+### physics
 
 - Arcade physics engine is used
 - The Raven's velocity is 50 units less than the player's velocity
