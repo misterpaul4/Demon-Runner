@@ -19,7 +19,7 @@ Demon Runner is a 2D endless runner game built with popular game framework Phase
 
 ## GamePlay
 
-Start by entering your username and then click on "START" to start the game. avoid Ravens and falling off the ground by pressing the spacebar key or UP ARROW key to jump. Click on the button underneath the start button to see if you made it to the TOP TEN :blush:
+Start by entering your username and then click on "START" to start the game. avoid Ravens and falling off the ground by pressing the SPACEBAR key or UP ARROW key to jump. Click on the button underneath the start button to see if you made it to the TOP TEN :blush:
 
 ## Getting Started
 
@@ -41,8 +41,8 @@ There are 5 Phaser scenes in this game.
 - The preloader scene displays  a progress bar and loads the other assets needed in the title scene.
 - The title scene loads the rest of the assets needed in the game such as the audio files, platforms, the player and bird. The title scene also displays a button to start the game, input player username and also view scores.
 - The game scene contains the main logic of the game.
-- The rank scene dosplays the top 10 highest scores.
-- The gameover scene is launched when the player is hit by a bird or falls down from the platform. This scene contains the a button to restart the game & also to quit the game
+- The rank scene displays the top 10 highest scores.
+- The gameover scene is launched when the player collides with the bird or falls off the platform. This scene contains a button to restart the game & also to quit the game
 
 ### characters
 
