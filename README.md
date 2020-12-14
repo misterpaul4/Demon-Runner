@@ -25,7 +25,8 @@ Start by entering your username and then click on "START" to start the game. avo
 
 - Clone the repository to get a local copy `git clone https://github.com/misterpaul4/Demon-Runner`
 - In the project's directory, install dependencies by running `npm install`
-- `npm run server` to start the game. This will launch your default browser. Click on the folder name "docs".
+- `npm run watch` to compile and watch for changes
+- In a new tab or terminal window, `npm run server` to start the game. This will launch your default browser. Click on the folder name "docs".
 
 ## Run Test
 
