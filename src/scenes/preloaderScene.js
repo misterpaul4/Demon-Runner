@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import startBtn from '../assets/start_btn.png';
-import background from '../assets/background.jpg';
 import leaderBoard from '../assets/leaderboard.png';
 
 export default class PreloaderScene extends Phaser.Scene {
@@ -76,7 +75,6 @@ export default class PreloaderScene extends Phaser.Scene {
     });
 
     this.load.image('startBtn', startBtn);
-    this.load.image('background', background);
     this.load.image('leaderboard', leaderBoard);
   }
 

@@ -28,7 +28,38 @@ Start by entering your username and then click on "START" to start the game. avo
 - `npm run server` to start the game. This will launch your default browser. Click on the folder name "docs".
 
 ## Run Test
+
 To run test, run the command `npm run test`. You can add more test in the `./test directory`.
+
+## Technical Details
+
+# scenes
+
+There are 5 Phaser scenes in this game.
+- The boot scene loads the game background.
+- The preloader scene displays  a progress bar and loads the other assets needed in the title scene.
+- The title scene loads the rest of the assets needed in the game such as the audio files, platforms, the player and bird. The title scene also displays a button to start the game, input player username and also view scores.
+- The game scene contains the main logic of the game.
+- The rank scene dosplays the top 10 highest scores.
+- The gameover scene is launched when the player is hit by a bird or falls down from the platform. This scene contains the a button to restart the game & also to quit the game
+
+# characters
+
+- Main character: A demon with the ability to levitate
+- Villain: A raven that attacks every few seconds
+
+# Timers
+
+- The score increases every second
+- The Raven attacks every 3 seconds
+- The footstep sound is played every 285ms
+
+# Physics
+
+- The Raven's velocity is 50 units less than the player's velocity
+- The Raven changes position every 3 seconds, 1000 units ahead of the player's position at that particular time. The y coordinates of the Raven is generated randomly.
+- There are 5 total platforms that are recycled throughtout the game
+
 
 ## Authors
 

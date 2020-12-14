@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
-import startBtn from '../assets/start_btn.png';
-import leaderBoard from '../assets/leaderboard.png';
+import background from '../assets/background.jpg';
 
 export default class BootScene extends Phaser.Scene {
   constructor() {
@@ -10,8 +9,7 @@ export default class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('start', startBtn);
-    this.load.image('leaderboard', leaderBoard);
+    this.load.image('background', background);
   }
 
   create() {
