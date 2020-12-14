@@ -58,6 +58,6 @@ export default class RankScene extends Phaser.Scene {
           fill: '#ffffff',
         }).setOrigin(1, 0.5);
       });
-    });
+    }).catch(() => {});
   }
 }
