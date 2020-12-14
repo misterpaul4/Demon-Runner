@@ -41,6 +41,7 @@ const fetchUserBestScore = async (username) => {
   });
 
   localStorage.setItem('best score', `${bestScore}`);
+  return bestScore;
 };
 
 export { uploadScore, getUsers, fetchUserBestScore };
