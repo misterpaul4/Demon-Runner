@@ -1,0 +1,61 @@
+form {
+  font-size: 25px;
+  padding: 7px;
+  position: absolute;
+  top: 20px;
+  transform: translateX(-50%);
+  left: 50%;
+  width: 10em;
+  border: 3px solid #a4a78a;
+  background-color: #2d2b2e;
+  color: white;
+  display: flex;
+  transition: opacity 500ms;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input {
+  border-radius: 0;
+  border: 0;
+  padding: 10px;
+  position: relative;
+}
+
+input[type="submit"] {
+  background-color: #a4a78a;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+}
+
+.username-alert {
+  position: absolute;
+  top: 2.2em;
+  left: 0;
+  font-size: 16px;
+  color: red;
+  font-style: italic;
+  opacity: 0;
+}
+
+.show-warning {
+  opacity: 1;
+  animation-name: ascend;
+  animation-duration: 1s;
+  animation-iteration-count: 5;
+}
+
+@keyframes ascend {
+  0% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0.3;
+  }
+}
