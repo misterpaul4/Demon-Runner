@@ -220,14 +220,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   die() {
-    this.sound.play('gameOverSound');
-    this.scene.pause('GameScene');
-    this.scene.launch('GameOverScene', this);
-
     // update bestscore
     if (this.score > Number(this.bestScore)) {
       localStorage.setItem('best score', this.score);
       uploadScore(localStorage.getItem('username'), this.score).catch(() => {});
     }
+    this.sound.play('gameOverSound');
+    this.scene.pause('GameScene');
+    this.scene.launch('GameOverScene', this);
   }
 }
