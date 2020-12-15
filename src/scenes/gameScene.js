@@ -220,10 +220,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   die() {
+    // upload score
+    uploadScore(localStorage.getItem('username'), this.score).catch(() => {});
     // update bestscore
     if (this.score > Number(this.bestScore)) {
       localStorage.setItem('best score', this.score);
-      uploadScore(localStorage.getItem('username'), this.score).catch(() => {});
     }
     this.sound.play('gameOverSound');
     this.scene.pause('GameScene');
