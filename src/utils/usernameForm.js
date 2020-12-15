@@ -32,8 +32,7 @@ export default (() => {
       const username = userInput.value;
       localStorage.setItem('username', username);
       // get best score
-      const bestScore = fetchUserBestScore(username).catch(() => {});
-      localStorage.setItem('best score', `${bestScore}`);
+      fetchUserBestScore(username).catch(() => {});
 
       formContainer.style.display = 'none';
       display(username, reff, ' ');
