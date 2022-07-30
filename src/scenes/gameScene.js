@@ -23,7 +23,7 @@ export default class GameScene extends Phaser.Scene {
     this.score = 0;
 
     // get user best score
-    this.bestScore = localStorage.getItem('best score');
+    this.bestScore = localStorage.getItem('best score') || 0;
     this.bestScoreLabel = this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
       font: '30px Arial',
       fill: '#fff',
