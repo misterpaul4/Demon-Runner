@@ -14,28 +14,37 @@ export default (() => {
     const userInput = document.createElement('input');
     const submitBtn = document.createElement('input');
     const usernameAlert = document.createElement('p');
+    const inputWrapper = document.createElement('div');
 
     userInput.id = 'username';
+    formContainer.id = 'userForm';
     userInput.placeholder = 'player name';
     submitBtn.type = 'submit';
     usernameAlert.className = 'username-alert';
+    inputWrapper.id = 'input-wrapper';
 
     usernameAlert.textContent = '* Please enter your preferred player name';
-    formContainer.appendChild(userInput);
-
-    formContainer.appendChild(submitBtn);
+    inputWrapper.appendChild(userInput);
+    inputWrapper.appendChild(submitBtn);
+    formContainer.appendChild(inputWrapper);
     formContainer.appendChild(usernameAlert);
     document.body.appendChild(formContainer);
 
     submitBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const username = userInput.value;
-      localStorage.setItem('username', username);
-      // get best score
-      fetchUserBestScore(username).catch(() => {});
+      if (username) {
+        localStorage.setItem('username', username);
+        // get best score
+        fetchUserBestScore(username).catch(() => {});
 
-      formContainer.style.display = 'none';
-      display(username, reff, ' ');
+        formContainer.style.display = 'none';
+        display(username, reff, ' ');
+      } else {
+        // display warning
+        const alertBox = document.querySelector('.username-alert');
+        alertBox.classList.add('show-warning');
+      }
     });
   };
 
