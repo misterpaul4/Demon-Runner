@@ -16,13 +16,13 @@ export default (() => {
     const usernameAlert = document.createElement('p');
 
     userInput.id = 'username';
-    userInput.placeholder = 'username';
+    userInput.placeholder = 'player name';
     submitBtn.type = 'submit';
     usernameAlert.className = 'username-alert';
 
-    usernameAlert.textContent = '* Please enter your username';
-
+    usernameAlert.textContent = '* Please enter your preferred player name';
     formContainer.appendChild(userInput);
+
     formContainer.appendChild(submitBtn);
     formContainer.appendChild(usernameAlert);
     document.body.appendChild(formContainer);

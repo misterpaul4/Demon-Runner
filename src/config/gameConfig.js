@@ -3,7 +3,7 @@ const gameOptions = {
   groundSizeRange: [50, 801],
   playerGravity: 900,
   jumpForce: 450,
-  jumps: 2,
+  jumps: 3,
   gameWidth: 800,
   gameHeight: 450,
   gameSpeed: 450,

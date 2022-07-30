@@ -13,6 +13,7 @@ import gameOverImg from '../assets/gameOver.png';
 import restartBtn from '../assets/restart_btn.png';
 import quitBtn from '../assets/quit_btn.png';
 import backBtn from '../assets/back_btn.png';
+import resetBtn from '../assets/reset_btn.png';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -33,6 +34,7 @@ export default class TitleScene extends Phaser.Scene {
     this.load.image('restartBtn', restartBtn);
     this.load.image('quitBtn', quitBtn);
     this.load.image('backBtn', backBtn);
+    this.load.image('resetBtn', resetBtn);
 
     this.load.spritesheet('player', player, {
       frameWidth: 500,
@@ -48,13 +50,15 @@ export default class TitleScene extends Phaser.Scene {
     this.add.image(400, 225, 'background');
 
     const startBtn = this.add.image(400, 150, 'startBtn');
-    const leaderboardBtn = this.add.image(400, 300, 'leaderboard');
+    const resetBtn = this.add.image(400, 230, 'resetBtn');
+    const leaderboardBtn = this.add.image(400, 350, 'leaderboard');
 
     // Add hover effects
     setMouseScale(startBtn, 1.05);
+    setMouseScale(resetBtn, 1.05);
     setMouseScale(leaderboardBtn, 1.05);
 
-    const usname = localStorage.getItem('username');
+    const usname = localStorage.getItem('username') || '';
 
     if (usname) {
       username.display(usname, this);
@@ -70,6 +74,11 @@ export default class TitleScene extends Phaser.Scene {
         const alertBox = document.querySelector('.username-alert');
         alertBox.classList.add('show-warning');
       }
+    });
+
+    resetBtn.on('pointerup', () => {
+      localStorage.clear();
+      window.location.reload();
     });
 
     leaderboardBtn.on('pointerup', () => {
