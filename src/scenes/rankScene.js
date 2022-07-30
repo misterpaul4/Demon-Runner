@@ -12,6 +12,8 @@ export default class RankScene extends Phaser.Scene {
 
   preload() {
     this.load.image('backBtn', backBtn);
+    const formContainer = document.getElementById('userForm');
+    document.body.removeChild(formContainer);
   }
 
   create() {
