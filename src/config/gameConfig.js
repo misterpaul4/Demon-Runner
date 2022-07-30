@@ -6,7 +6,7 @@ const gameOptions = {
   jumps: 3,
   gameWidth: 800,
   gameHeight: 450,
-  gameSpeed: 400,
+  gameSpeed: 450,
   ranks: 10,
 };
 
