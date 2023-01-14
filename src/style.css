@@ -5,7 +5,6 @@ form {
   top: 20px;
   transform: translateX(-50%);
   left: 50%;
-  width: 10em;
   border: 3px solid #a4a78a;
   background-color: #2d2b2e;
   color: white;
@@ -24,6 +23,10 @@ input {
   border: 0;
   padding: 10px;
   position: relative;
+}
+
+#username {
+  width: 15em;
 }
 
 input[type="submit"] {
