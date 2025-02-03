@@ -1,36 +1,37 @@
 import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 
-export class GameOver extends Scene
-{
+export class GameOver extends Scene {
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
-    gameOverText : Phaser.GameObjects.Text;
+    gameOverText: Phaser.GameObjects.Text;
 
-    constructor ()
-    {
+    constructor() {
         super('GameOver');
     }
 
-    create ()
-    {
-        this.camera = this.cameras.main
-        this.camera.setBackgroundColor(0xff0000);
+    create() {
+        this.add.image(400, 180, 'gameOver').setScale(0.4).setScrollFactor(0, 1);
+        const restartBtn = this.add.image(250, 350, 'restartBtn').setScrollFactor(0, 1);
+        const quitBtn = this.add.image(520, 350, 'quitBtn').setScrollFactor(0, 1);
 
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
+        quitBtn.setInteractive();
+        restartBtn.setInteractive();
 
-        this.gameOverText = this.add.text(512, 384, 'Game Over', {
-            fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
-        
+        quitBtn.on('pointerup', () => {
+          this.scene.stop('Game');
+          this.scene.start('MainMenu');
+        });
+
+        restartBtn.on('pointerup', () => {
+          this.scene.stop('Game');
+          this.scene.start('Game');
+        });
+
         EventBus.emit('current-scene-ready', this);
     }
 
-    changeScene ()
-    {
+    changeScene() {
         this.scene.start('MainMenu');
     }
 }

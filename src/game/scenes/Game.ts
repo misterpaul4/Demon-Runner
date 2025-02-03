@@ -1,36 +1,265 @@
 import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 
-export class Game extends Scene
-{
-    camera: Phaser.Cameras.Scene2D.Camera;
-    background: Phaser.GameObjects.Image;
-    gameText: Phaser.GameObjects.Text;
+import Phaser from 'phaser';
+import settings from '../../utils/config';
+import { uploadScore } from '../../utils/leaderBoardAPI';
 
-    constructor ()
-    {
-        super('Game');
+export class Game extends Scene {
+    background: Phaser.GameObjects.Image;
+    platforms: Phaser.Physics.Arcade.StaticGroup;
+    scoreLabel: Phaser.GameObjects.Text;
+    score: number;
+    bestScore: number;
+    bestScoreLabel: Phaser.GameObjects.Text;
+    groundY: number;
+    groundX: number;
+    player: Phaser.Physics.Arcade.Sprite;
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    hitGround: boolean;
+    jumps: number;
+    pushable: boolean;
+    bird: Phaser.Physics.Arcade.Sprite;
+    newPlatform: Phaser.Physics.Arcade.Sprite;
+
+    constructor() {
+        super({
+            key: 'Game',
+        });
     }
 
-    create ()
-    {
-        this.camera = this.cameras.main;
-        this.camera.setBackgroundColor(0x00ff00);
+    create() {
+        this.add.image(400, 225, 'background').setScrollFactor(0, 1);
+        this.platforms = this.physics.add.staticGroup();
 
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
+        // score label
+        this.scoreLabel = this.add.text(30, 20, 'Time:\t\t\t0', {
+            font: '30px Arial',
+            color: '#fff',
+        }).setScrollFactor(0, 1);
 
-        this.gameText = this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
+        // initialize score
+        this.score = 0;
+
+        // get user best score
+        this.bestScore = Number(localStorage.getItem('best score')) || 0;
+        this.bestScoreLabel = this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
+            font: '30px Arial',
+            color: '#fff',
+        }).setScrollFactor(0, 1);
+
+        // timer to increase score
+        this.time.addEvent({
+            delay: 1000,
+            callback: this.updateTimer,
+            callbackScope: this,
+            loop: true,
+        });
+
+        // initial ground position
+        this.groundY = 400;
+        this.groundX = 900;
+
+        // first ground platform
+        this.platforms.create(400, this.groundY + 30, 'ground');
+
+        this.player = this.physics.add.sprite(50, 350, 'player').setScale(0.1);
+
+        this.player.setBounce(0.15);
+        // this.player.setCollideWorldBounds(true);
+
+        // camera.startFollow(gameObject, roundPx, lerpX, lerpY, offsetX, offsetY);
+        this.cameras.main.startFollow(this.player, false, 1, 0, -200, 125);
+
+        // set player velocity
+        this.player.setVelocityX(settings.gameSpeed);
+
+        // checks if player landed on the floor
+        this.hitGround = false;
+
+        if (this.input.keyboard) {
+            // set space key and up-arrow key for jumping
+            this.cursors = this.input.keyboard.createCursorKeys();
+            this.input.keyboard.on('keydown-SPACE', this.jump, this);
+            this.input.keyboard.on('keydown-UP', this.jump, this);
+        }
+
+
+        // initialize number of jumps for the player
+        this.jumps = settings.jumps;
+
+        this.pushable = false;
+
+        // timer for raven attack
+        this.time.addEvent({
+            delay: 3000,
+            callback: this.ravenAttack,
+            callbackScope: this,
+            loop: true,
+        });
+
+        // create 4 platforms
+        Array.from({ length: 4 }).forEach(() => this.createPlatform());
+
+        // RAVEN
+        this.bird = this.physics.add.sprite(900, 100, 'bird').setScale(0.17);
+        (this.bird.body as Phaser.Physics.Arcade.Body)?.setAllowGravity(false);
+
+        // set raven velocity 50 dist/s less than player speed
+        this.bird.setVelocityX(-(settings.gameSpeed - 50));
+
+        // set collisions
+        this.physics.add.collider(this.platforms, this.player, this.hitFloor, undefined, this);
+        this.physics.add.collider(this.bird, this.player, this.hitRaven, undefined, this);
+
+        // player animation
+        this.anims.create({
+            key: 'run',
+            frames: this.anims.generateFrameNumbers('player', {
+                start: 0,
+                end: 11,
+            }),
+            frameRate: 22,
+            repeat: -1,
+        });
+
+        this.anims.create({
+            key: 'jump',
+            frames: [{
+                key: 'player',
+                frame: 12,
+            }],
+        });
+
+        // bird animation
+        this.anims.create({
+            key: 'fly',
+            frames: this.anims.generateFrameNumbers('bird', {
+                start: 0,
+                end: 10,
+            }),
+            frameRate: 8,
+            repeat: -1,
+        });
+
+        // timer for running sound
+        this.time.addEvent({
+            delay: 285,
+            callback: () => {
+                if (this.player.body?.touching.down) {
+                    this.sound.play('run');
+                }
+            },
+            callbackScope: this,
+            loop: true,
+        });
 
         EventBus.emit('current-scene-ready', this);
     }
 
-    changeScene ()
-    {
+    update() {
+        this.movement();
+        this.checkPlatform();
+        // check if player fell down or is moving backward due to impact
+        const body = this.player.body as Phaser.Physics.Arcade.Body;
+        if (body && (this.player.y > 480 || body.velocity.x < settings.gameSpeed)) {
+            this.die();
+        }
+    }
+
+    checkPlatform() {
+        // destroy and reposition the ground platform
+        this.platforms.getChildren().forEach((platform) => {
+            const platformSprite = platform as Phaser.Physics.Arcade.Sprite; // or Phaser.Physics.Arcade.Image if it's an image
+
+            if (this.player.x > (platformSprite.x + 1000)) {
+                this.createPlatform();
+                this.platforms.remove(platform, true);
+            }
+        });
+    }
+
+    movement() {
+        this.bird.anims.play('fly', true);
+        if (this.player.body?.touching.down) {
+            this.player.anims.play('run', true);
+            this.player.clearTint();
+            // reset jumps
+            this.jumps = settings.jumps;
+        }
+    }
+
+    createPlatform() {
+        this.newPlatform = this.platforms.create(this.groundX, this.groundY, 'ground').setOrigin(0);
+        this.newPlatform.displayWidth = Phaser.Math.Between(
+            settings.groundSizeRange[0], settings.groundSizeRange[1],
+        );
+        this.groundX += (this.newPlatform.displayWidth + Phaser.Math.Between(
+            settings.groundSpaceRange[0], settings.groundSpaceRange[1],
+        ));
+
+        const {
+            body,
+        } = this.newPlatform;
+        body?.updateFromGameObject();
+    }
+
+    hitFloor() {
+        if (this.hitGround) {
+            this.sound.play('hitGround');
+            this.hitGround = false;
+        }
+    }
+
+    hitRaven() {
+        this.bird.setTint(0xff1000);
+        this.die();
+    }
+
+    die() {
+        this.sound.play('gameOver');
+        this.scene.pause('Game');
+
+        // upload score
+        uploadScore(localStorage.getItem('username'), this.score).then(() => {
+            // update bestscore
+            if (this.score > Number(this.bestScore)) {
+                localStorage.setItem('best score', String(this.score));
+            }
+            this.scene.launch('GameOver', this);
+        }).catch(() => { });
+    }
+
+
+    ravenAttack() {
+        // reposition raven position
+        this.bird.x = this.player.x + 1000;
+        this.bird.y = Phaser.Math.Between(150, 370);
+        this.sound.play('bird');
+    }
+
+
+    jump() {
+        if (this.jumps > 0) {
+            this.player.setVelocityY(-settings.jumpForce);
+            this.player.anims.play('jump', true);
+            this.player.setTint(0xff0000);
+            this.jumps -= 1;
+            this.sound.play('jump');
+            this.hitGround = true;
+        }
+    }
+
+    updateTimer() {
+        this.score += 1;
+        this.scoreLabel.setText(`Time:\t\t\t${this.score}`);
+        // check for new best
+        if (this.score > Number(this.bestScore)) {
+            this.bestScoreLabel.setText(`Best Time:\t\t\t${this.score}`);
+        }
+    }
+
+    changeScene() {
         this.scene.start('GameOver');
     }
 }

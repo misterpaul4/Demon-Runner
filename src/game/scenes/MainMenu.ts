@@ -1,76 +1,84 @@
 import { GameObjects, Scene } from 'phaser';
 
 import { EventBus } from '../EventBus';
-
-export class MainMenu extends Scene
-{
+import hoverEffect from '../../utils/hoverEffect';
+import username from '../../utils/usernameForm';
+export class MainMenu extends Scene {
     background: GameObjects.Image;
-    logo: GameObjects.Image;
-    title: GameObjects.Text;
-    logoTween: Phaser.Tweens.Tween | null;
+    startBtn: GameObjects.Image;
+    resetBtn: GameObjects.Image;
+    leaderboardBtn: GameObjects.Image;
 
-    constructor ()
-    {
+    constructor() {
         super('MainMenu');
     }
 
-    create ()
-    {
-        this.background = this.add.image(512, 384, 'background');
+    preload() {
+        this.load.setPath('assets');
+        this.load.audio('jump', 'sound/jump.mp3');
+        this.load.audio('bird', 'sound/crow.mp3');
+        this.load.audio('run', 'sound/footstep.mp3');
+        this.load.audio('hitGround', 'sound/hitGround.mp3');
+        this.load.audio('gameOver', 'sound/gameOver.mp3');
 
-        this.logo = this.add.image(512, 300, 'logo').setDepth(100);
+        this.load.image('ground', 'ground.png');
+        this.load.image('gameOver', 'gameOver.png');
+        this.load.image('restartBtn', 'restart_btn.png');
+        this.load.image('quitBtn', 'quit_btn.png');
+        this.load.image('backBtn', 'back_btn.png');
+        this.load.image('resetBtn', 'reset_btn.png');
 
-        this.title = this.add.text(512, 460, 'Main Menu', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
+        this.load.spritesheet('player', 'characterSprite2.png', {
+          frameWidth: 500,
+          frameHeight: 632,
+        });
+        this.load.spritesheet('bird', 'birdSprite.png', {
+          frameHeight: 416,
+          frameWidth: 416,
+        });
+      }
+
+    create() {
+        this.background = this.add.image(400, 225, 'background');
+        this.startBtn = this.add.image(400, 150, 'startBtn');
+        this.resetBtn = this.add.image(400, 230, 'resetBtn');
+        this.leaderboardBtn = this.add.image(400, 350, 'leaderboard');
+
+        // Add hover effects
+        hoverEffect(this.startBtn, 1.05);
+        hoverEffect(this.resetBtn, 1.05);
+        hoverEffect(this.leaderboardBtn, 1.05);
 
         EventBus.emit('current-scene-ready', this);
-    }
-    
-    changeScene ()
-    {
-        if (this.logoTween)
-        {
-            this.logoTween.stop();
-            this.logoTween = null;
-        }
 
-        this.scene.start('Game');
+
+    const usname = localStorage.getItem('username') || '';
+
+    if (usname) {
+      username.display(usname, this);
+    } else {
+      username.enter(this);
     }
 
-    moveLogo (vueCallback: ({ x, y }: { x: number, y: number }) => void)
-    {
-        if (this.logoTween)
-        {
-            if (this.logoTween.isPlaying())
-            {
-                this.logoTween.pause();
-            }
-            else
-            {
-                this.logoTween.play();
-            }
-        } 
-        else
-        {
-            this.logoTween = this.tweens.add({
-                targets: this.logo,
-                x: { value: 750, duration: 3000, ease: 'Back.easeInOut' },
-                y: { value: 80, duration: 1500, ease: 'Sine.easeOut' },
-                yoyo: true,
-                repeat: -1,
-                onUpdate: () => {
-                    if (vueCallback)
-                    {
-                        vueCallback({
-                            x: Math.floor(this.logo.x),
-                            y: Math.floor(this.logo.y)
-                        });
-                    }
-                }
-            });
-        }
+    this.startBtn.on('pointerup', this.changeScene.bind(this));
+
+    this.resetBtn.on('pointerup', () => {
+      localStorage.clear();
+      window.location.reload();
+    });
+
+    this.leaderboardBtn.on('pointerup', () => {
+      this.scene.start('RankScene');
+    });
+    }
+
+    changeScene() {
+        if (localStorage.getItem('username')) {
+            this.scene.start('Game');
+          } else {
+            // display warning
+            const alertBox = document.querySelector('.username-alert');
+            alertBox?.classList.add('show-warning');
+          }
     }
 }
