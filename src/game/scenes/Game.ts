@@ -16,9 +16,8 @@ export class Game extends Scene {
     groundX: number;
     player: Phaser.Physics.Arcade.Sprite;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-    hitGround: boolean;
+    hitGround?: boolean;
     jumps: number;
-    pushable: boolean;
     bird: Phaser.Physics.Arcade.Sprite;
     newPlatform: Phaser.Physics.Arcade.Sprite;
 
@@ -56,6 +55,18 @@ export class Game extends Scene {
             loop: true,
         });
 
+        // timer for running sound
+        this.time.addEvent({
+            delay: 285,
+            callback: () => {
+                if (this.player.body?.touching.down) {
+                    this.sound.play('run');
+                }
+            },
+            callbackScope: this,
+            loop: true,
+        });
+
         // initial ground position
         this.groundY = 400;
         this.groundX = 900;
@@ -66,16 +77,12 @@ export class Game extends Scene {
         this.player = this.physics.add.sprite(50, 350, 'player').setScale(0.1);
 
         this.player.setBounce(0.15);
-        // this.player.setCollideWorldBounds(true);
 
         // camera.startFollow(gameObject, roundPx, lerpX, lerpY, offsetX, offsetY);
         this.cameras.main.startFollow(this.player, false, 1, 0, -200, 125);
 
         // set player velocity
         this.player.setVelocityX(settings.gameSpeed);
-
-        // checks if player landed on the floor
-        this.hitGround = false;
 
         if (this.input.keyboard) {
             // set space key and up-arrow key for jumping
@@ -84,11 +91,8 @@ export class Game extends Scene {
             this.input.keyboard.on('keydown-UP', this.jump, this);
         }
 
-
         // initialize number of jumps for the player
         this.jumps = settings.jumps;
-
-        this.pushable = false;
 
         // timer for raven attack
         this.time.addEvent({
@@ -119,7 +123,7 @@ export class Game extends Scene {
                 start: 0,
                 end: 11,
             }),
-            frameRate: 22,
+            frameRate: 25,
             repeat: -1,
         });
 
@@ -140,18 +144,6 @@ export class Game extends Scene {
             }),
             frameRate: 8,
             repeat: -1,
-        });
-
-        // timer for running sound
-        this.time.addEvent({
-            delay: 285,
-            callback: () => {
-                if (this.player.body?.touching.down) {
-                    this.sound.play('run');
-                }
-            },
-            callbackScope: this,
-            loop: true,
         });
 
         EventBus.emit('current-scene-ready', this);
@@ -205,9 +197,9 @@ export class Game extends Scene {
     }
 
     hitFloor() {
-        if (this.hitGround) {
+        if (this.hitGround === false) {
             this.sound.play('hitGround');
-            this.hitGround = false;
+            this.hitGround = true;
         }
     }
 
@@ -241,12 +233,12 @@ export class Game extends Scene {
 
     jump() {
         if (this.jumps > 0) {
+            this.sound.play('jump');
             this.player.setVelocityY(-settings.jumpForce);
             this.player.anims.play('jump', true);
             this.player.setTint(0xff0000);
             this.jumps -= 1;
-            this.sound.play('jump');
-            this.hitGround = true;
+            this.hitGround = false;
         }
     }
 

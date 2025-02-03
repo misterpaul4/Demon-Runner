@@ -15,18 +15,6 @@ export class MainMenu extends Scene {
 
     preload() {
         this.load.setPath('assets');
-        this.load.audio('jump', 'sound/jump.mp3');
-        this.load.audio('bird', 'sound/crow.mp3');
-        this.load.audio('run', 'sound/footstep.mp3');
-        this.load.audio('hitGround', 'sound/hitGround.mp3');
-        this.load.audio('gameOver', 'sound/gameOver.mp3');
-
-        this.load.image('ground', 'ground.png');
-        this.load.image('gameOver', 'gameOver.png');
-        this.load.image('restartBtn', 'restart_btn.png');
-        this.load.image('quitBtn', 'quit_btn.png');
-        this.load.image('backBtn', 'back_btn.png');
-        this.load.image('resetBtn', 'reset_btn.png');
 
         this.load.spritesheet('player', 'characterSprite2.png', {
           frameWidth: 500,
