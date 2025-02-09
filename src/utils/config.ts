@@ -8,7 +8,6 @@ export default {
     gameHeight: 450,
     gameSpeed: 450,
     ranks: 10,
-    backgroundColor: '#028af8',
     username: localStorage.getItem('username') || '',
     bestScore: 0,
 };

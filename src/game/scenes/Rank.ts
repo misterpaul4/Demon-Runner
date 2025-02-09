@@ -35,9 +35,14 @@ export class Rank extends Scene {
 
         getUsers().then((record) => {
             loadingText.destroy();
+
             if (record) {
+                const sortedRecord = Object.fromEntries(
+                    Object.entries(record).sort((a, b) => b[1] - a[1])
+                );
+
                 let index = 0;
-                for (const user in record) {
+                for (const user in sortedRecord) {
                     this.add
                         .text(
                             settings.gameWidth / 2.6,
