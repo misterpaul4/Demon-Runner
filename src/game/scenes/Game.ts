@@ -116,35 +116,39 @@ export class Game extends Scene {
         this.physics.add.collider(this.platforms, this.player, this.hitFloor, undefined, this);
         this.physics.add.collider(this.bird, this.player, this.hitRaven, undefined, this);
 
-        // player animation
-        this.anims.create({
-            key: 'run',
-            frames: this.anims.generateFrameNumbers('player', {
-                start: 0,
-                end: 11,
-            }),
-            frameRate: 25,
-            repeat: -1,
-        });
+        if (!this.anims.exists("run")) {
+            this.anims.create({
+                key: 'run',
+                frames: this.anims.generateFrameNumbers('player', {
+                    start: 0,
+                    end: 11,
+                }),
+                frameRate: 25,
+                repeat: -1,
+            });
+        }
 
-        this.anims.create({
-            key: 'jump',
-            frames: [{
-                key: 'player',
-                frame: 12,
-            }],
-        });
+        if (!this.anims.exists("jump")) {
+            this.anims.create({
+                key: 'jump',
+                frames: [{
+                    key: 'player',
+                    frame: 12,
+                }],
+            });
+        }
 
-        // bird animation
-        this.anims.create({
-            key: 'fly',
-            frames: this.anims.generateFrameNumbers('bird', {
-                start: 0,
-                end: 10,
-            }),
-            frameRate: 8,
-            repeat: -1,
-        });
+        if (!this.anims.exists("fly")) {
+            this.anims.create({
+                key: 'fly',
+                frames: this.anims.generateFrameNumbers('bird', {
+                    start: 0,
+                    end: 10,
+                }),
+                frameRate: 8,
+                repeat: -1,
+            });
+        }
 
         EventBus.emit('current-scene-ready', this);
     }
