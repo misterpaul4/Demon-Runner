@@ -10,6 +10,7 @@ export class MainMenu extends Scene {
     startBtn: GameObjects.Image;
     resetBtn: GameObjects.Image;
     leaderboardBtn: GameObjects.Image;
+    audioBtn: GameObjects.Image;
 
     constructor() {
         super('MainMenu');
@@ -33,11 +34,14 @@ export class MainMenu extends Scene {
         this.startBtn = this.add.image(400, 150, 'startBtn');
         this.resetBtn = this.add.image(400, 230, 'resetBtn');
         this.leaderboardBtn = this.add.image(400, 350, 'leaderboard');
+        this.audioBtn = this.add.image(80, 400, config.sound ? 'muteBtn' : 'unmuteBtn');
+        this.sound.mute = config.sound;
 
         // Add hover effects
         hoverEffect(this.startBtn, 1.05);
         hoverEffect(this.resetBtn, 1.05);
         hoverEffect(this.leaderboardBtn, 1.05);
+        hoverEffect(this.audioBtn, 1.05);
 
         EventBus.emit('current-scene-ready', this);
 
@@ -56,6 +60,19 @@ export class MainMenu extends Scene {
 
     this.leaderboardBtn.on('pointerup', () => {
       this.scene.start('Rank');
+    });
+
+    this.audioBtn.on('pointerup', () => {
+      config.sound = !config.sound;
+      this.sound.mute = config.sound;
+
+      if (config.sound) {
+        this.audioBtn.setTexture('muteBtn');
+      } else {
+        this.audioBtn.setTexture('unmuteBtn');
+      }
+
+      localStorage.setItem('sound', String(config.sound));
     });
     }
 

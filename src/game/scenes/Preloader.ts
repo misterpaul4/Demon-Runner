@@ -42,7 +42,8 @@ export class Preloader extends Scene {
         this.load.image('quitBtn', 'quit_btn.png');
         this.load.image('backBtn', 'back_btn.png');
         this.load.image('resetBtn', 'reset_btn.png');
-
+        this.load.image('muteBtn', 'mute.png');
+        this.load.image('unmuteBtn', 'unmute.png');
     }
 
     create() {

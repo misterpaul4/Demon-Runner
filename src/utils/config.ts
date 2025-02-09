@@ -10,4 +10,5 @@ export default {
     ranks: 10,
     username: localStorage.getItem('username') || '',
     bestScore: 0,
+    sound: Boolean(localStorage.getItem('sound') === 'true') ?? true
 };

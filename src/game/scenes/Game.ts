@@ -59,7 +59,7 @@ export class Game extends Scene {
         this.time.addEvent({
             delay: 285,
             callback: () => {
-                if (this.player.body?.touching.down) {
+                if (!settings.sound && this.player.body?.touching.down) {
                     this.sound.play('run');
                 }
             },
@@ -202,7 +202,7 @@ export class Game extends Scene {
 
     hitFloor() {
         if (this.hitGround === false) {
-            this.sound.play('hitGround');
+            !settings.sound && this.sound.play('hitGround');
             this.hitGround = true;
         }
     }
@@ -213,7 +213,7 @@ export class Game extends Scene {
     }
 
     die() {
-        this.sound.play('gameOver');
+        !settings.sound && this.sound.play('gameOver');
         this.scene.pause('Game');
 
         // upload score
@@ -227,13 +227,13 @@ export class Game extends Scene {
         // reposition raven position
         this.bird.x = this.player.x + 1000;
         this.bird.y = Phaser.Math.Between(150, 370);
-        this.sound.play('bird');
+        !settings.sound && this.sound.play('bird');
     }
 
 
     jump() {
         if (this.jumps > 0) {
-            this.sound.play('jump');
+            !settings.sound && this.sound.play('jump');
             this.player.setVelocityY(-settings.jumpForce);
             this.player.anims.play('jump', true);
             this.player.setTint(0xff0000);

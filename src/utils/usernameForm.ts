@@ -33,7 +33,7 @@ export default (() => {
 
         submitBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const username = userInput.value;
+            const username = userInput.value?.toLowerCase().trim();
             if (username) {
                 config.username = username;
                 submitBtn.disabled = true;
