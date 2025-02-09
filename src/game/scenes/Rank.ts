@@ -59,7 +59,7 @@ export class Rank extends Scene {
                         .text(
                             settings.gameWidth / 2.6 + 10,
                             multiplier * (index + 6),
-                            `${user}`,
+                            `${user === settings.username ? '\u{1F464}  ' : ''}${user}`,
                             {
                                 font: '15px Sans-serif',
                                 color: '#ffffff',
