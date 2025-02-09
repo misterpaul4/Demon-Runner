@@ -2,7 +2,9 @@ import { GameObjects, Scene } from 'phaser';
 
 import { EventBus } from '../EventBus';
 import hoverEffect from '../../utils/hoverEffect';
-import username from '../../utils/usernameForm';
+import Form from '../../utils/usernameForm';
+import config from '../../utils/config';
+import { fetchUserBestScore } from '../../utils/leaderBoardAPI';
 export class MainMenu extends Scene {
     background: GameObjects.Image;
     startBtn: GameObjects.Image;
@@ -39,13 +41,10 @@ export class MainMenu extends Scene {
 
         EventBus.emit('current-scene-ready', this);
 
-
-    const usname = localStorage.getItem('username') || '';
-
-    if (usname) {
-      username.display(usname, this);
+    if (config.username) {
+      Form.display(config.username, this);
     } else {
-      username.enter(this);
+      Form.enter(this);
     }
 
     this.startBtn.on('pointerup', this.changeScene.bind(this));
@@ -60,8 +59,9 @@ export class MainMenu extends Scene {
     });
     }
 
-    changeScene() {
-        if (localStorage.getItem('username')) {
+    async changeScene() {
+        if (config.username) {
+            await fetchUserBestScore();
             this.scene.start('Game');
           } else {
             // display warning

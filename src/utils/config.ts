@@ -9,5 +9,6 @@ export default {
     gameSpeed: 450,
     ranks: 10,
     backgroundColor: '#028af8',
-    username: '',
+    username: localStorage.getItem('username') || '',
+    bestScore: 0,
 };

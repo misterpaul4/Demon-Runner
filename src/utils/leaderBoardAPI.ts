@@ -2,12 +2,11 @@ import { ref, get, orderByValue, query, limitToLast, set } from "firebase/databa
 import { firebaseDB } from "../main";
 import config from './config'
 
-const uploadScore = async (username: string, score: number) => {
-    const bestScore = await fetchUserBestScore(username);
-
-    if (score > bestScore) {
-        const scoresRef = ref(firebaseDB, `demonRunner/${username}`);
+const uploadScore = async (score: number) => {
+    if (score > config.bestScore) {
+        const scoresRef = ref(firebaseDB, `demonRunner/${config.username}`);
         await set(scoresRef, score);
+        config.bestScore = score
     }
 
     return score
@@ -28,16 +27,13 @@ const getUsers = async (): Promise<Record<string, number> | undefined> => {
     }
 };
 
-const fetchUserBestScore = async (username: string) => {
-    const scoresRef = ref(firebaseDB, `demonRunner/${username}`);
+const fetchUserBestScore = async () => {
+    const scoresRef = ref(firebaseDB, `demonRunner/${config.username}`);
     const data = await get(scoresRef);
-    let bestScore = 0;
 
     if (data.exists()) {
-        bestScore = data.val();
+        config.bestScore = data.val();
     }
-
-    return bestScore;
 };
 
 export { uploadScore, getUsers, fetchUserBestScore };

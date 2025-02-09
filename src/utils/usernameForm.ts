@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import config from './config';
 import settings from './config';
-import { fetchUserBestScore } from './leaderBoardAPI';
 
 export default (() => {
   const display = (username: string, reff: any, newUser = ' back ') => {
@@ -34,9 +34,8 @@ export default (() => {
       e.preventDefault();
       const username = userInput.value;
       if (username) {
+        config.username = username;
         localStorage.setItem('username', username);
-        // get best score
-        fetchUserBestScore(username).catch(() => {});
 
         formContainer.style.display = 'none';
         display(username, reff, ' ');

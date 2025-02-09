@@ -41,7 +41,7 @@ export class Game extends Scene {
         this.score = 0;
 
         // get user best score
-        this.bestScore = Number(localStorage.getItem('best score')) || 0;
+        this.bestScore = settings.bestScore
         this.bestScoreLabel = this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
             font: '30px Arial',
             color: '#fff',
@@ -213,11 +213,7 @@ export class Game extends Scene {
         this.scene.pause('Game');
 
         // upload score
-        uploadScore(<string>localStorage.getItem('username'), this.score).then(() => {
-            // update bestscore
-            if (this.score > Number(this.bestScore)) {
-                localStorage.setItem('best score', String(this.score));
-            }
+        uploadScore(this.score).then(() => {
             this.scene.launch('GameOver', this);
         }).catch(() => { });
     }
