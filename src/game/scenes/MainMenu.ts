@@ -56,7 +56,7 @@ export class MainMenu extends Scene {
     });
 
     this.leaderboardBtn.on('pointerup', () => {
-      this.scene.start('RankScene');
+      this.scene.start('Rank');
     });
     }
 

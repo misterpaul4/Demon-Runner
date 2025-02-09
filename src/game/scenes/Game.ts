@@ -213,7 +213,7 @@ export class Game extends Scene {
         this.scene.pause('Game');
 
         // upload score
-        uploadScore(localStorage.getItem('username'), this.score).then(() => {
+        uploadScore(<string>localStorage.getItem('username'), this.score).then(() => {
             // update bestscore
             if (this.score > Number(this.bestScore)) {
                 localStorage.setItem('best score', String(this.score));

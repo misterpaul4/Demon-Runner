@@ -1,47 +1,43 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ref, get, orderByValue, query, limitToLast, set } from "firebase/database";
+import { firebaseDB } from "../main";
+import config from './config'
 
-const baseUrl = 'https://us-central1-js-capstone-backend.cloudfunctions.net/api/games/vNNYorW3U7bLbVIMpbN7/scores/';
+const uploadScore = async (username: string, score: number) => {
+    const bestScore = await fetchUserBestScore(username);
 
-const uploadScore = async (username: any, score: any) => {
-  const data = {
-    user: username,
-    score,
-  };
+    if (score > bestScore) {
+        const scoresRef = ref(firebaseDB, `demonRunner/${username}`);
+        await set(scoresRef, score);
+    }
 
-  const response = await fetch(baseUrl, {
-    method: 'POST',
-    cache: 'no-cache',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  return response.ok;
+    return score
 };
 
-const getUsers = async () => {
-  const scores = await fetch(baseUrl, { method: 'GET' });
-  const response = await scores.json();
-  const allScores = response.result;
-  return allScores;
+const getUsers = async (): Promise<Record<string, number> | undefined> => {
+    const scoresRef = ref(firebaseDB, "demonRunner/");
+
+    try {
+        const snapshot = await get(query(scoresRef, orderByValue(), limitToLast(config.ranks)));
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            throw new Error("No data available");
+        }
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
 };
 
 const fetchUserBestScore = async (username: string) => {
-  let bestScore = 0;
-  const scores = await fetch(baseUrl, { method: 'GET' });
-  const response = await scores.json();
-  const allScores = response.result;
-  allScores.forEach((name: any) => {
-    if (name.user === username) {
-      if (name.score > bestScore) {
-        bestScore = name.score;
-      }
-    }
-  });
+    const scoresRef = ref(firebaseDB, `demonRunner/${username}`);
+    const data = await get(scoresRef);
+    let bestScore = 0;
 
-  localStorage.setItem('best score', `${bestScore}`);
-  return bestScore;
+    if (data.exists()) {
+        bestScore = data.val();
+    }
+
+    return bestScore;
 };
 
 export { uploadScore, getUsers, fetchUserBestScore };
