@@ -71,7 +71,7 @@ export class Rank extends Scene {
                         .text(
                             settings.gameWidth / 2.6 + 200,
                             multiplier * (index + 6),
-                            `${record[user]}`,
+                            `${user === settings.username ? `[ ${record[user]} ]`  : record[user]}`,
                             {
                                 font: '15px Sans-serif',
                                 color: '#ffffff',
