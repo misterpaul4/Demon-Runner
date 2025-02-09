@@ -6,7 +6,7 @@ form {
     transform: translateX(-50%);
     left: 50%;
     border: 3px solid #a4a78a;
-    background-color: #2d2b2e;
+    background-color: #010001;
     color: white;
     display: flex;
     transition: opacity 500ms;

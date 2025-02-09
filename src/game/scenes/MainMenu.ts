@@ -61,7 +61,9 @@ export class MainMenu extends Scene {
 
     async changeScene() {
         if (config.username) {
-            await fetchUserBestScore();
+            if (!config.bestScore) {
+                await fetchUserBestScore();
+            }
             this.scene.start('Game');
           } else {
             // display warning
