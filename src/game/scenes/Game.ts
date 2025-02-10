@@ -78,7 +78,6 @@ export class Game extends Scene {
 
         this.player.setBounce(0.15);
 
-        // camera.startFollow(gameObject, roundPx, lerpX, lerpY, offsetX, offsetY);
         this.cameras.main.startFollow(this.player, false, 1, 0, -200, 125);
 
         // set player velocity
@@ -156,7 +155,6 @@ export class Game extends Scene {
     update() {
         this.movement();
         this.checkPlatform();
-        // check if player fell down or is moving backward due to impact
         const body = this.player.body as Phaser.Physics.Arcade.Body;
         if (body && (this.player.y > 480 || body.velocity.x < settings.gameSpeed)) {
             this.die();
@@ -164,9 +162,8 @@ export class Game extends Scene {
     }
 
     checkPlatform() {
-        // destroy and reposition the ground platform
         this.platforms.getChildren().forEach((platform) => {
-            const platformSprite = platform as Phaser.Physics.Arcade.Sprite; // or Phaser.Physics.Arcade.Image if it's an image
+            const platformSprite = platform as Phaser.Physics.Arcade.Sprite;
 
             if (this.player.x > (platformSprite.x + 1000)) {
                 this.createPlatform();
