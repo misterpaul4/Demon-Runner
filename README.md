@@ -15,7 +15,7 @@ Demon Runner is a 2D endless runner game built with popular game framework Phase
 
 ## Live Demo
 
-[Live Demo Link](https://misterpaul4.github.io/Demon-Runner/)
+[Live Demo Link](https://bucolic-creponne-fb215c.netlify.app/)
 
 ## GamePlay
 
