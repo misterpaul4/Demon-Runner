@@ -10,6 +10,13 @@ export default (() => {
         }).setOrigin(0.5);
     };
 
+    const remove = () => {
+        const form = document.getElementById('userForm');
+        form?.remove();
+        const alertBox = document.querySelector('.username-alert');
+        alertBox?.remove();
+    };
+
     const enter = (reff: any) => {
         const formContainer = document.createElement('form');
         const userInput = document.createElement('input');
@@ -52,5 +59,5 @@ export default (() => {
         });
     };
 
-    return { enter, display };
+    return { enter, display, remove };
 })();

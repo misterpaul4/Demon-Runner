@@ -74,6 +74,10 @@ export class MainMenu extends Scene {
 
       localStorage.setItem('sound', String(config.sound));
     });
+
+    this.events.on('shutdown', () => {
+      Form.remove();
+    });
     }
 
     async changeScene() {
