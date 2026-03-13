@@ -21,6 +21,8 @@ export class Game extends Scene {
     jumps: number;
     bird: Phaser.Physics.Arcade.Sprite;
     newPlatform: Phaser.Physics.Arcade.Sprite;
+    isPaused: boolean;
+    pauseLabel: Phaser.GameObjects.Text;
 
     constructor() {
         super({
@@ -29,6 +31,7 @@ export class Game extends Scene {
     }
 
     create() {
+        this.isPaused = false;
         this.background = this.add.image(settings.gameWidth / 2, settings.gameHeight / 2, 'background')
             .setScrollFactor(0, 1);
         this.background.setDisplaySize(settings.gameWidth, settings.gameHeight);
@@ -63,6 +66,12 @@ export class Game extends Scene {
             fontSize: '42px',
             color: '#fff',
         }).setScrollFactor(0, 1);
+
+        this.pauseLabel = this.add.text(settings.gameWidth / 2, settings.gameHeight / 2 - 30, 'PAUSED', {
+            fontFamily: 'Bushiroad',
+            fontSize: '72px',
+            color: '#f4f0d8',
+        }).setOrigin(0.5).setScrollFactor(0, 1).setVisible(false);
 
         // timer to increase score
         this.time.addEvent({
@@ -105,6 +114,8 @@ export class Game extends Scene {
             this.cursors = this.input.keyboard.createCursorKeys();
             this.input.keyboard.on('keydown-SPACE', this.jump, this);
             this.input.keyboard.on('keydown-UP', this.jump, this);
+            this.input.keyboard.on('keydown-P', this.togglePause, this);
+            this.input.keyboard.on('keydown-ESC', this.togglePause, this);
         }
 
         // initialize number of jumps for the player
@@ -170,6 +181,9 @@ export class Game extends Scene {
     }
 
     update() {
+        if (this.isPaused) {
+            return;
+        }
         this.movement();
         this.checkPlatform();
         const body = this.player.body as Phaser.Physics.Arcade.Body;
@@ -245,6 +259,9 @@ export class Game extends Scene {
 
 
     jump() {
+        if (this.isPaused) {
+            return;
+        }
         if (this.jumps > 0) {
             !settings.sound && this.sound.play('jump');
             this.player.setVelocityY(-settings.jumpForce);
@@ -267,5 +284,25 @@ export class Game extends Scene {
 
     changeScene() {
         this.scene.start('GameOver');
+    }
+
+    togglePause() {
+        if (!this.scene.isActive('Game')) {
+            return;
+        }
+
+        this.isPaused = !this.isPaused;
+        this.physics.world.isPaused = this.isPaused;
+        this.time.timeScale = this.isPaused ? 0 : 1;
+        this.pauseLabel.setVisible(this.isPaused);
+
+        if (this.isPaused) {
+            this.player.anims.pause();
+            this.bird.anims.pause();
+            return;
+        }
+
+        this.player.anims.resume();
+        this.bird.anims.resume();
     }
 }

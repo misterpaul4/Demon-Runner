@@ -1,13 +1,24 @@
 import { GameObjects, Scene } from 'phaser';
+import { createElement, Volume2, VolumeX } from 'lucide';
 
 import { EventBus } from '../EventBus';
 import config from '../../utils/config';
 import createTextLink from '../../utils/createTextLink';
+
+const createAudioIconMarkup = (muted: boolean) => createElement(muted ? VolumeX : Volume2, {
+    width: 22,
+    height: 22,
+    color: muted ? '#f3d7d0' : '#eff4ee',
+    stroke: muted ? '#f3d7d0' : '#eff4ee',
+    'stroke-width': 2.1,
+    'aria-hidden': 'true',
+}).outerHTML;
+
 export class MainMenu extends Scene {
     background: GameObjects.Image;
     startBtn: Phaser.GameObjects.Container;
     resetBtn: Phaser.GameObjects.Container;
-    audioBtn: GameObjects.Image;
+    audioBtn: Phaser.GameObjects.DOMElement;
 
     constructor() {
         super('MainMenu');
@@ -60,30 +71,31 @@ export class MainMenu extends Scene {
         this.startBtn.setY(centerY - totalHeight / 2 + this.startBtn.height / 2);
         this.resetBtn.setY(centerY + totalHeight / 2 - this.resetBtn.height / 2);
 
-        this.audioBtn = this.add.image(100, config.gameHeight - 70, config.sound ? 'muteBtn' : 'unmuteBtn');
+        this.audioBtn = this.add.dom(82, config.gameHeight - 76, 'button');
+        this.audioBtn.setScrollFactor(0);
+        this.audioBtn.setDepth(20);
+
+        const audioButtonNode = this.audioBtn.node as HTMLButtonElement;
+        audioButtonNode.type = 'button';
+        audioButtonNode.className = 'menu-audio-toggle';
+
+        const updateAudioButton = () => {
+            audioButtonNode.classList.toggle('is-muted', config.sound);
+            audioButtonNode.setAttribute('aria-label', config.sound ? 'Unmute sound' : 'Mute sound');
+            audioButtonNode.innerHTML = createAudioIconMarkup(config.sound);
+        };
+
         this.sound.mute = config.sound;
-        this.audioBtn.setInteractive();
-        this.audioBtn.on('pointerover', () => {
-            this.audioBtn.setScale(1.05);
-        });
-        this.audioBtn.on('pointerout', () => {
-            this.audioBtn.setScale(1);
-        });
+        updateAudioButton();
 
         EventBus.emit('current-scene-ready', this);
 
-    this.audioBtn.on('pointerup', () => {
-      config.sound = !config.sound;
-      this.sound.mute = config.sound;
-
-      if (config.sound) {
-        this.audioBtn.setTexture('muteBtn');
-      } else {
-        this.audioBtn.setTexture('unmuteBtn');
-      }
-
-      localStorage.setItem('sound', String(config.sound));
-    });
+        audioButtonNode.addEventListener('click', () => {
+            config.sound = !config.sound;
+            this.sound.mute = config.sound;
+            localStorage.setItem('sound', String(config.sound));
+            updateAudioButton();
+        });
     }
 
     changeScene() {
