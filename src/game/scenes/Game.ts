@@ -29,17 +29,19 @@ export class Game extends Scene {
     }
 
     create() {
-        this.add.image(400, 225, 'background').setScrollFactor(0, 1);
+        this.background = this.add.image(settings.gameWidth / 2, settings.gameHeight / 2, 'background')
+            .setScrollFactor(0, 1);
+        this.background.setDisplaySize(settings.gameWidth, settings.gameHeight);
         this.platforms = this.physics.add.staticGroup();
 
         // score label
         this.scoreLabel = this.add.text(30, 20, 'Time:', {
-            fontFamily: 'Bushiroad',
-            fontSize: '30px',
+            fontFamily: 'BrushScriptStd',
+            fontSize: '42px',
             color: '#fff',
         }).setScrollFactor(0, 1);
 
-        this.scoreValueLabel = this.add.text(200, 16, '0', {
+        this.scoreValueLabel = this.add.text(150, 16, '0', {
             fontFamily: 'BrushScriptStd',
             fontSize: '42px',
             color: '#fff',
@@ -51,12 +53,12 @@ export class Game extends Scene {
         // get user best score
         this.bestScore = settings.bestScore
         this.bestScoreLabel = this.add.text(30, 60, 'Best Time:', {
-            fontFamily: 'Bushiroad',
+            fontFamily: 'BrushScriptStd',
             fontSize: '30px',
             color: '#fff',
         }).setScrollFactor(0, 1);
 
-        this.bestScoreValueLabel = this.add.text(250, 56, `${this.bestScore}`, {
+        this.bestScoreValueLabel = this.add.text(195, 56, `${this.bestScore}`, {
             fontFamily: 'BrushScriptStd',
             fontSize: '42px',
             color: '#fff',
@@ -83,17 +85,17 @@ export class Game extends Scene {
         });
 
         // initial ground position
-        this.groundY = 400;
-        this.groundX = 900;
+        this.groundY = settings.gameHeight - 110;
+        this.groundX = settings.gameWidth + 100;
 
         // first ground platform
-        this.platforms.create(400, this.groundY + 30, 'ground');
+        this.platforms.create(settings.gameWidth / 2, this.groundY + 30, 'ground');
 
-        this.player = this.physics.add.sprite(50, 350, 'player').setScale(0.1);
+        this.player = this.physics.add.sprite(110, settings.gameHeight - 170, 'player').setScale(0.1);
 
         this.player.setBounce(0.15);
 
-        this.cameras.main.startFollow(this.player, false, 1, 0, -200, 125);
+        this.cameras.main.startFollow(this.player, false, 1, 0, -320, 180);
 
         // set player velocity
         this.player.setVelocityX(settings.gameSpeed);
@@ -120,7 +122,7 @@ export class Game extends Scene {
         Array.from({ length: 4 }).forEach(() => this.createPlatform());
 
         // RAVEN
-        this.bird = this.physics.add.sprite(900, 100, 'bird').setScale(0.17);
+        this.bird = this.physics.add.sprite(settings.gameWidth + 100, 180, 'bird').setScale(0.17);
         (this.bird.body as Phaser.Physics.Arcade.Body)?.setAllowGravity(false);
 
         // set raven velocity 50 dist/s less than player speed
@@ -171,7 +173,7 @@ export class Game extends Scene {
         this.movement();
         this.checkPlatform();
         const body = this.player.body as Phaser.Physics.Arcade.Body;
-        if (body && (this.player.y > 480 || body.velocity.x < settings.gameSpeed)) {
+        if (body && (this.player.y > settings.gameHeight + 40 || body.velocity.x < settings.gameSpeed)) {
             this.die();
         }
     }
@@ -237,7 +239,7 @@ export class Game extends Scene {
     ravenAttack() {
         // reposition raven position
         this.bird.x = this.player.x + 1000;
-        this.bird.y = Phaser.Math.Between(150, 370);
+        this.bird.y = Phaser.Math.Between(180, settings.gameHeight - 170);
         !settings.sound && this.sound.play('bird');
     }
 

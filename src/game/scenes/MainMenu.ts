@@ -1,12 +1,12 @@
 import { GameObjects, Scene } from 'phaser';
 
 import { EventBus } from '../EventBus';
-import hoverEffect from '../../utils/hoverEffect';
 import config from '../../utils/config';
+import createTextLink from '../../utils/createTextLink';
 export class MainMenu extends Scene {
     background: GameObjects.Image;
-    startBtn: GameObjects.Image;
-    resetBtn: GameObjects.Image;
+    startBtn: Phaser.GameObjects.Container;
+    resetBtn: Phaser.GameObjects.Container;
     audioBtn: GameObjects.Image;
 
     constructor() {
@@ -27,25 +27,50 @@ export class MainMenu extends Scene {
       }
 
     create() {
-        this.background = this.add.image(400, 225, 'background');
-        this.startBtn = this.add.image(400, 170, 'startBtn');
-        this.resetBtn = this.add.image(400, 290, 'resetBtn');
-        this.audioBtn = this.add.image(80, 400, config.sound ? 'muteBtn' : 'unmuteBtn');
-        this.sound.mute = config.sound;
+        const centerX = config.gameWidth / 2;
+        const centerY = config.gameHeight / 2;
 
-        // Add hover effects
-        hoverEffect(this.startBtn, 1.05);
-        hoverEffect(this.resetBtn, 1.05);
-        hoverEffect(this.audioBtn, 1.05);
+        this.background = this.add.image(centerX, centerY, 'background');
+        this.background.setDisplaySize(config.gameWidth, config.gameHeight);
+
+        this.add.text(centerX, 150, 'HIRO RUN', {
+            fontFamily: 'Bushiroad',
+            fontSize: '84px',
+            color: '#c93a2f',
+        }).setOrigin(0.5);
+
+        this.startBtn = createTextLink(this, centerX, 0, 'start game', this.changeScene.bind(this), {
+            fontSize: 40,
+            color: '#ffffff',
+            backgroundPaddingX: 56,
+            underlineOffsetY: 18,
+        });
+        this.resetBtn = createTextLink(this, centerX, 0, 'clear record', () => {
+            localStorage.removeItem('bestScore');
+            window.location.reload();
+        }, {
+            fontSize: 40,
+            color: '#ffffff',
+            backgroundPaddingX: 56,
+            underlineOffsetY: 18,
+        });
+
+        const buttonGap = 28;
+        const totalHeight = this.startBtn.height + this.resetBtn.height + buttonGap;
+        this.startBtn.setY(centerY - totalHeight / 2 + this.startBtn.height / 2);
+        this.resetBtn.setY(centerY + totalHeight / 2 - this.resetBtn.height / 2);
+
+        this.audioBtn = this.add.image(100, config.gameHeight - 70, config.sound ? 'muteBtn' : 'unmuteBtn');
+        this.sound.mute = config.sound;
+        this.audioBtn.setInteractive();
+        this.audioBtn.on('pointerover', () => {
+            this.audioBtn.setScale(1.05);
+        });
+        this.audioBtn.on('pointerout', () => {
+            this.audioBtn.setScale(1);
+        });
 
         EventBus.emit('current-scene-ready', this);
-
-    this.startBtn.on('pointerup', this.changeScene.bind(this));
-
-    this.resetBtn.on('pointerup', () => {
-      localStorage.removeItem('bestScore');
-      window.location.reload();
-    });
 
     this.audioBtn.on('pointerup', () => {
       config.sound = !config.sound;
