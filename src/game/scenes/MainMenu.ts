@@ -41,9 +41,9 @@ export class MainMenu extends Scene {
           frameWidth: 500,
           frameHeight: 632,
         });
-        this.load.spritesheet('bird', 'birdSprite.png', {
-          frameHeight: 416,
-          frameWidth: 416,
+        this.load.spritesheet('bird', 'bird.png', {
+          frameHeight: 341,
+          frameWidth: 341,
         });
       }
 

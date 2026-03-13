@@ -128,31 +128,28 @@ export class Shop extends Scene {
                 wordWrap: { width: 210 },
             }).setOrigin(0.5);
 
-            const actionBar = this.add.rectangle(0, 106, 178, 52, this.getActionColor(itemState), 0.94);
+            const actionBar = this.add.rectangle(0, 108, 178, 64, this.getActionColor(itemState), 0.94);
             actionBar.setStrokeStyle(1, 0xf3e8cd, itemState === 'available' ? 0.24 : 0.12);
 
-            const actionLabel = this.add.text(0, 106, this.getActionLabel(item, itemState), {
-                fontFamily: 'Bushiroad',
-                fontSize: '24px',
+            const actionLabel = this.add.text(0, itemState === 'available' || itemState === 'locked' ? 94 : 108, this.getActionLabel(itemState), {
+                fontFamily: CN_FONT,
+                fontSize: '20px',
                 color: itemState === 'available' ? '#fff7dd' : '#d6cfbf',
+                fontStyle: '700',
             }).setOrigin(0.5);
 
-            const priceStar = this.add.image(-48, 106, 'star');
+            const priceStar = this.add.image(-34, 122, 'star');
             priceStar.setScale(0.075);
             priceStar.setVisible(itemState === 'available' || itemState === 'locked');
 
-            const price = this.add.text(6, 106, `${item.price}`, {
+            const price = this.add.text(20, 122, `${item.price}`, {
                 fontFamily: 'Bushiroad',
                 fontSize: '24px',
                 color: '#fff4cf',
             }).setOrigin(0.5);
             price.setVisible(itemState === 'available' || itemState === 'locked');
 
-            if (itemState !== 'available' && itemState !== 'locked') {
-                actionLabel.setPosition(0, 106);
-            }
-
-            const hitArea = this.add.zone(0, 106, 178, 52).setOrigin(0.5);
+            const hitArea = this.add.zone(0, 108, 178, 64).setOrigin(0.5);
             if (itemState === 'available') {
                 hitArea.setInteractive({ useHandCursor: true });
                 hitArea.on('pointerup', () => {
@@ -204,20 +201,20 @@ export class Shop extends Scene {
         return 'available';
     }
 
-    getActionLabel(item: ShopItemConfig, state: 'owned' | 'soon' | 'locked' | 'available') {
+    getActionLabel(state: 'owned' | 'soon' | 'locked' | 'available') {
         if (state === 'owned') {
-            return 'OWNED';
+            return '已拥有';
         }
 
         if (state === 'soon') {
-            return 'COMING SOON';
+            return '敬请期待';
         }
 
         if (state === 'locked') {
-            return 'NEED MORE';
+            return '星星不足';
         }
 
-        return `BUY`;
+        return '购买';
     }
 
     getActionColor(state: 'owned' | 'soon' | 'locked' | 'available') {

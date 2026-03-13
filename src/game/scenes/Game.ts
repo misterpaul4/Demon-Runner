@@ -161,6 +161,7 @@ export class Game extends Scene {
 
         // RAVEN
         this.bird = this.physics.add.sprite(settings.gameWidth + 100, 180, 'bird').setScale(0.17);
+        this.bird.setFlipX(true);
         (this.bird.body as Phaser.Physics.Arcade.Body)?.setAllowGravity(false);
         (this.bird.body as Phaser.Physics.Arcade.Body).enable = false;
         this.bird.setActive(false).setVisible(false);
@@ -202,7 +203,7 @@ export class Game extends Scene {
                 key: 'fly',
                 frames: this.anims.generateFrameNumbers('bird', {
                     start: 0,
-                    end: 10,
+                    end: 8,
                 }),
                 frameRate: 8,
                 repeat: -1,
@@ -471,16 +472,6 @@ export class Game extends Scene {
     }
 
     getDifficultyState() {
-        if (this.score < 5) {
-            return {
-                speed: 300,
-                groundSpaceRange: [0, 0] as [number, number],
-                groundSizeRange: [520, 920] as [number, number],
-                spearChance: 0,
-                birdModulo: null,
-            };
-        }
-
         if (this.score < 30) {
             return {
                 speed: 330,
