@@ -7,9 +7,12 @@ import settings from '../../utils/config';
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
     platforms: Phaser.Physics.Arcade.StaticGroup;
+    starsGroup: Phaser.Physics.Arcade.Group;
     scoreLabel: Phaser.GameObjects.Text;
     scoreValueLabel: Phaser.GameObjects.Text;
     score: number;
+    stars: number;
+    starsValueLabel: Phaser.GameObjects.Text;
     bestScore: number;
     bestScoreLabel: Phaser.GameObjects.Text;
     bestScoreValueLabel: Phaser.GameObjects.Text;
@@ -36,6 +39,10 @@ export class Game extends Scene {
             .setScrollFactor(0, 1);
         this.background.setDisplaySize(settings.gameWidth, settings.gameHeight);
         this.platforms = this.physics.add.staticGroup();
+        this.starsGroup = this.physics.add.group({
+            allowGravity: false,
+            immovable: true,
+        });
 
         // score label
         this.scoreLabel = this.add.text(30, 20, 'Time:', {
@@ -52,6 +59,17 @@ export class Game extends Scene {
 
         // initialize score
         this.score = 0;
+        this.stars = Number(localStorage.getItem('stars') || '0');
+
+        this.add.image(settings.gameWidth - 138, 52, 'star')
+            .setScale(0.5)
+            .setAngle(-12)
+            .setScrollFactor(0, 1);
+        this.starsValueLabel = this.add.text(settings.gameWidth - 92, 58, `${this.stars}`, {
+            fontFamily: 'BrushScriptStd',
+            fontSize: '50px',
+            color: '#fff4cf',
+        }).setOrigin(0, 0.5).setScrollFactor(0, 1);
 
         // get user best score
         this.bestScore = settings.bestScore
@@ -142,6 +160,7 @@ export class Game extends Scene {
         // set collisions
         this.physics.add.collider(this.platforms, this.player, this.hitFloor, undefined, this);
         this.physics.add.collider(this.bird, this.player, this.hitRaven, undefined, this);
+        this.physics.add.overlap(this.player, this.starsGroup, this.collectStar, undefined, this);
 
         if (!this.anims.exists("run")) {
             this.anims.create({
@@ -186,6 +205,7 @@ export class Game extends Scene {
         }
         this.movement();
         this.checkPlatform();
+        this.checkStars();
         const body = this.player.body as Phaser.Physics.Arcade.Body;
         if (body && (this.player.y > settings.gameHeight + 40 || body.velocity.x < settings.gameSpeed)) {
             this.die();
@@ -203,6 +223,16 @@ export class Game extends Scene {
         });
     }
 
+    checkStars() {
+        this.starsGroup.getChildren().forEach((starObject) => {
+            const star = starObject as Phaser.Physics.Arcade.Image;
+
+            if (this.player.x > star.x + 1000) {
+                this.starsGroup.remove(star, true, true);
+            }
+        });
+    }
+
     movement() {
         this.bird.anims.play('fly', true);
         if (this.player.body?.touching.down) {
@@ -214,10 +244,13 @@ export class Game extends Scene {
     }
 
     createPlatform() {
-        this.newPlatform = this.platforms.create(this.groundX, this.groundY, 'ground').setOrigin(0);
+        const platformX = this.groundX;
+        this.newPlatform = this.platforms.create(platformX, this.groundY, 'ground').setOrigin(0);
         this.newPlatform.displayWidth = Phaser.Math.Between(
             settings.groundSizeRange[0], settings.groundSizeRange[1],
         );
+
+        this.spawnStarsForPlatform(platformX, this.newPlatform.displayWidth);
         this.groundX += (this.newPlatform.displayWidth + Phaser.Math.Between(
             settings.groundSpaceRange[0], settings.groundSpaceRange[1],
         ));
@@ -226,6 +259,44 @@ export class Game extends Scene {
             body,
         } = this.newPlatform;
         body?.updateFromGameObject();
+    }
+
+    spawnStarsForPlatform(platformX: number, platformWidth: number) {
+        if (platformWidth < 150 || Phaser.Math.Between(0, 100) > 62) {
+            return;
+        }
+
+        const maxStars = Phaser.Math.Clamp(Math.floor(platformWidth / 210), 1, 3);
+        const starCount = Phaser.Math.Between(1, maxStars);
+        const spacing = starCount === 1 ? 0 : Phaser.Math.Clamp(platformWidth / (starCount + 1), 64, 104);
+        const startX = platformX + platformWidth / 2 - (spacing * (starCount - 1)) / 2;
+        const baseY = this.groundY - Phaser.Math.Between(70, 132);
+
+        Array.from({ length: starCount }).forEach((_, index) => {
+            const arcOffset = starCount > 1 ? Math.abs(index - (starCount - 1) / 2) * 10 : 0;
+            this.createStar(startX + spacing * index, baseY - arcOffset);
+        });
+    }
+
+    createStar(x: number, y: number) {
+        const star = this.starsGroup.create(x, y, 'star') as Phaser.Physics.Arcade.Image;
+        star.setScale(0.085);
+        star.setAngle(Phaser.Math.Between(-14, 14));
+
+        const body = star.body as Phaser.Physics.Arcade.Body;
+        body.setAllowGravity(false);
+        body.setImmovable(true);
+        body.setSize(star.width * 0.72, star.height * 0.72, true);
+
+        this.tweens.add({
+            targets: star,
+            y: y - 10,
+            angle: star.angle + 10,
+            duration: Phaser.Math.Between(850, 1200),
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
     }
 
     hitFloor() {
@@ -238,6 +309,16 @@ export class Game extends Scene {
     hitRaven() {
         this.bird.setTint(0xff1000);
         this.die();
+    }
+
+    collectStar(_player: Phaser.GameObjects.GameObject, starObject: Phaser.GameObjects.GameObject) {
+        const star = starObject as Phaser.Physics.Arcade.Image;
+        this.stars += 1;
+        localStorage.setItem('stars', String(this.stars));
+        this.starsValueLabel.setText(`${this.stars}`);
+
+        this.tweens.killTweensOf(star);
+        star.disableBody(true, true);
     }
 
     die() {

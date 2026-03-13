@@ -1,5 +1,5 @@
 import { GameObjects, Scene } from 'phaser';
-import { createElement, Volume2, VolumeX } from 'lucide';
+import { createElement, ShoppingBag, Volume2, VolumeX } from 'lucide';
 
 import { EventBus } from '../EventBus';
 import config from '../../utils/config';
@@ -14,11 +14,21 @@ const createAudioIconMarkup = (muted: boolean) => createElement(muted ? VolumeX 
     'aria-hidden': 'true',
 }).outerHTML;
 
+const createShopIconMarkup = (stars: number) => `${createElement(ShoppingBag, {
+    width: 22,
+    height: 22,
+    color: '#fff0cf',
+    stroke: '#fff0cf',
+    'stroke-width': 2.1,
+    'aria-hidden': 'true',
+}).outerHTML}<span class="menu-shop-badge"><img src="assets/star.png" alt="" /><span>${stars}</span></span>`;
+
 export class MainMenu extends Scene {
     background: GameObjects.Image;
     startBtn: Phaser.GameObjects.Container;
     resetBtn: Phaser.GameObjects.Container;
     audioBtn: Phaser.GameObjects.DOMElement;
+    shopBtn: Phaser.GameObjects.DOMElement;
 
     constructor() {
         super('MainMenu');
@@ -68,8 +78,9 @@ export class MainMenu extends Scene {
 
         const buttonGap = 28;
         const totalHeight = this.startBtn.height + this.resetBtn.height + buttonGap;
-        this.startBtn.setY(centerY - totalHeight / 2 + this.startBtn.height / 2);
-        this.resetBtn.setY(centerY + totalHeight / 2 - this.resetBtn.height / 2);
+        const startY = centerY - totalHeight / 2;
+        this.startBtn.setY(startY + this.startBtn.height / 2);
+        this.resetBtn.setY(this.startBtn.y + this.startBtn.height / 2 + buttonGap + this.resetBtn.height / 2);
 
         this.audioBtn = this.add.dom(82, config.gameHeight - 76, 'button');
         this.audioBtn.setScrollFactor(0);
@@ -88,6 +99,17 @@ export class MainMenu extends Scene {
         this.sound.mute = config.sound;
         updateAudioButton();
 
+        this.shopBtn = this.add.dom(config.gameWidth - 82, config.gameHeight - 76, 'button');
+        this.shopBtn.setScrollFactor(0);
+        this.shopBtn.setDepth(20);
+
+        const shopButtonNode = this.shopBtn.node as HTMLButtonElement;
+        const stars = Number(localStorage.getItem('stars') || '0');
+        shopButtonNode.type = 'button';
+        shopButtonNode.className = 'menu-shop-toggle';
+        shopButtonNode.setAttribute('aria-label', 'Open shop');
+        shopButtonNode.innerHTML = createShopIconMarkup(stars);
+
         EventBus.emit('current-scene-ready', this);
 
         audioButtonNode.addEventListener('click', () => {
@@ -96,9 +118,17 @@ export class MainMenu extends Scene {
             localStorage.setItem('sound', String(config.sound));
             updateAudioButton();
         });
+
+        shopButtonNode.addEventListener('click', () => {
+            this.openShop();
+        });
     }
 
     changeScene() {
         this.scene.start('Game');
+    }
+
+    openShop() {
+        this.scene.start('Shop');
     }
 }
