@@ -6,7 +6,6 @@ import { AUTO, Game } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import cg from '../utils/config';
 import '../../public/style.css';
-import { Rank } from './scenes/Rank';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
@@ -28,8 +27,7 @@ const config: Phaser.Types.Core.GameConfig = {
         Preloader,
         MainMenu,
         MainGame,
-        GameOver,
-        Rank
+        GameOver
     ]
 };
 

@@ -3,15 +3,16 @@ import { Scene } from 'phaser';
 
 import Phaser from 'phaser';
 import settings from '../../utils/config';
-import { uploadScore } from '../../utils/leaderBoardAPI';
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
     platforms: Phaser.Physics.Arcade.StaticGroup;
     scoreLabel: Phaser.GameObjects.Text;
+    scoreValueLabel: Phaser.GameObjects.Text;
     score: number;
     bestScore: number;
     bestScoreLabel: Phaser.GameObjects.Text;
+    bestScoreValueLabel: Phaser.GameObjects.Text;
     groundY: number;
     groundX: number;
     player: Phaser.Physics.Arcade.Sprite;
@@ -32,8 +33,15 @@ export class Game extends Scene {
         this.platforms = this.physics.add.staticGroup();
 
         // score label
-        this.scoreLabel = this.add.text(30, 20, 'Time:\t\t\t0', {
-            font: '30px Arial',
+        this.scoreLabel = this.add.text(30, 20, 'Time:', {
+            fontFamily: 'Bushiroad',
+            fontSize: '30px',
+            color: '#fff',
+        }).setScrollFactor(0, 1);
+
+        this.scoreValueLabel = this.add.text(200, 16, '0', {
+            fontFamily: 'BrushScriptStd',
+            fontSize: '42px',
             color: '#fff',
         }).setScrollFactor(0, 1);
 
@@ -42,8 +50,15 @@ export class Game extends Scene {
 
         // get user best score
         this.bestScore = settings.bestScore
-        this.bestScoreLabel = this.add.text(30, 60, `Best Time:\t\t\t${this.bestScore}`, {
-            font: '30px Arial',
+        this.bestScoreLabel = this.add.text(30, 60, 'Best Time:', {
+            fontFamily: 'Bushiroad',
+            fontSize: '30px',
+            color: '#fff',
+        }).setScrollFactor(0, 1);
+
+        this.bestScoreValueLabel = this.add.text(250, 56, `${this.bestScore}`, {
+            fontFamily: 'BrushScriptStd',
+            fontSize: '42px',
             color: '#fff',
         }).setScrollFactor(0, 1);
 
@@ -212,11 +227,10 @@ export class Game extends Scene {
     die() {
         !settings.sound && this.sound.play('gameOver');
         this.scene.pause('Game');
-
-        // upload score
-        uploadScore(this.score).then(() => {
-            this.scene.launch('GameOver', this);
-        }).catch(() => { });
+        const bestScore = Math.max(this.score, Number(settings.bestScore));
+        settings.bestScore = bestScore;
+        localStorage.setItem('bestScore', String(bestScore));
+        this.scene.launch('GameOver', this);
     }
 
 
@@ -241,10 +255,11 @@ export class Game extends Scene {
 
     updateTimer() {
         this.score += 1;
-        this.scoreLabel.setText(`Time:\t\t\t${this.score}`);
+        this.scoreValueLabel.setText(`${this.score}`);
         // check for new best
         if (this.score > Number(this.bestScore)) {
-            this.bestScoreLabel.setText(`Best Time:\t\t\t${this.score}`);
+            this.bestScore = this.score;
+            this.bestScoreValueLabel.setText(`${this.score}`);
         }
     }
 

@@ -1,91 +1,83 @@
-# Demon Runner
+# 希罗快跑
 
-Demon Runner is a 2D endless runner game built with popular game framework Phaser. The real inspiration of building this type of endless runner game was google chrome's popular T-Rex. I always wanted to reproduce the T-Rex game with some adjustments and this project gave me opportunity to do just that. The goal is to dodge incoming ravens and avoid fallen down as long as you can.
+“希罗快跑”是一个基于原项目 [Demon Runner](https://github.com/misterpaul4/Demon-Runner) 二次创作开发的同人跑酷小游戏。
+
+当前仓库不是原版 `Demon Runner` 的直接说明文档，而是这个二创版本的开发仓库。项目保留了横版无尽跑酷的核心玩法，并在视觉、字体和内容表达上做了面向“希罗快跑”的调整。
 
 ![screenshot](./screenshot.gif)
 
-## Built With
+## 项目说明
 
-- HTMl,
-- CSS,
-- Webpack
-- Javascript
-- Phaser
-- LeaderBoard API
+- 类型：Phaser 3 横版无尽跑酷游戏
+- 前端：React 18 + Vite + TypeScript
+- 游戏引擎：Phaser 3
+- 运行方式：浏览器本地运行
 
-## Live Demo
+当前版本是纯本地单机玩法。玩家点击开始后直接进入游戏，通过跳跃躲避障碍并尽可能存活更长时间。游戏会在浏览器本地保存最佳成绩和音效开关状态。
 
-[Live Demo Link](https://bucolic-creponne-fb215c.netlify.app/)
+## 原项目来源
 
-## GamePlay
+本项目基于以下开源仓库进行二次创作：
 
-Start by entering your username and then click on "START" to start the game. avoid Ravens and falling off the ground by pressing the SPACEBAR key or UP ARROW key to jump. Click on the button underneath the start button to see if you made it to the TOP TEN :blush:
+- 原仓库：<https://github.com/misterpaul4/Demon-Runner>
 
-## Getting Started
+如果你想看最初版本的玩法、素材组织和项目背景，请直接查看原仓库说明；如果你要运行或继续开发当前这个“希罗快跑”版本，请以本 README 为准。
 
-- Clone the repository to get a local copy `git clone https://github.com/misterpaul4/Demon-Runner`
-- In the project's directory, install dependencies by running `npm install`
-- `npm run watch` to compile and watch for changes
-- In a new tab or terminal window, `npm run server` to start the game. This will launch your default browser. Click on the folder name "docs".
+## 当前功能
 
-## Run Test
+- 主菜单和游戏场景
+- 本地保存音效开关状态
+- 计时与最佳成绩显示
+- 游戏结束后重新开始或返回菜单
+- 自定义字体显示
 
-To run test, run the command `npm run test`. You can add more test in the `./test directory`.
+## 本地开发
 
-## Technical Details
+### 1. 安装依赖
 
-### scenes
+```bash
+npm install
+```
 
-There are 5 Phaser scenes in this game.
-- The boot scene loads the game background.
-- The preloader scene displays  a progress bar and loads the other assets needed in the title scene.
-- The title scene loads the rest of the assets needed in the game such as the audio files, platforms, the player and bird. The title scene also displays a button to start the game, input player username and also view scores.
-- The game scene contains the main logic of the game.
-- The rank scene displays the top 10 highest scores.
-- The gameover scene is launched when the player collides with the bird or falls off the platform. This scene contains a button to restart the game & also to quit the game
+### 2. 启动开发环境
 
-### characters
+```bash
+npm run dev
+```
 
-- Main character: A demon with the ability to levitate
-- Villain: A raven that attacks every few seconds
+默认会通过 Vite 启动本地开发服务器。
 
-### timers
+### 3. 生产构建
 
-- The score increases every second
-- The Raven attacks every 3 seconds
-- The footstep sound is played every 285ms
+```bash
+npm run build
+```
 
-### physics
+## 玩法
 
-- Arcade physics engine is used
-- The Raven's velocity is 50 units less than the player's velocity
-- The Raven changes position every 3 seconds, 1000 units ahead of the player's position at that particular time. The y coordinates of the Raven is generated randomly.
-- There are 5 total platforms that are recycled throughtout the game
+- 点击开始按钮进入游戏
+- 使用 `Space` 或 `↑` 进行跳跃
+- 尽量避开敌人和掉落
+- 存活时间越长，分数越高
 
+## 项目结构
 
-## Authors
+```text
+src/
+  game/
+    scenes/        Phaser 场景
+  utils/           配置、表单、排行榜等工具代码
+public/
+  assets/          游戏资源
+  fonts/           自定义字体
+```
 
-👤 **Chukwuebuka Paul Ajuizeogu**
-- Github: [@misterpaul4](https://github.com/misterpaul4)
-- Twitter: [@paulajuze](https://twitter.com/paulajuze)
-- Linkedin: [Chukwuebuka Paul Ajuizeogu](https://www.linkedin.com/in/chukwuebuka-paul-ajuizeogu/)
+## 说明补充
 
-## Acknowledgments
-- [Phaser.io](https://phaser.io/)
-- [Microverse](https://www.microverse.org/)
-- [OpenGameArt](https://opengameart.org/)
-- [Kenney](https://www.kenney.nl/)
+- 当前仓库中的 README 已按“希罗快跑”版本重写，不再沿用原始 `Demon Runner` 的项目介绍。
+- 如果你继续对这个仓库做二创，建议同步更新素材来源、角色设定和版权说明。
+- 当前版本已经移除了用户名输入和排行榜流程，后续可以直接接入站点 JWT 身份体系。
 
-## 🤝 Contributing
+## License
 
-Contributions, issues and feature requests are welcome!
-
-Feel free to check the [issues page](issues/).
-
-## Show your support
-
-Give a ⭐️ if you like this project!
-
-## 📝 License
-
-This project is [MIT](lic.url) licensed.
+当前仓库沿用项目内已有许可证文件，详见 [LICENSE](./LICENSE)。

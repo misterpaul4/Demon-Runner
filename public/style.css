@@ -1,67 +1,18 @@
-form {
-    font-size: 25px;
-    padding: 7px;
-    position: absolute;
-    top: 20px;
-    transform: translateX(-50%);
-    left: 50%;
-    border: 3px solid #a4a78a;
-    background-color: #010001;
-    color: white;
-    display: flex;
-    transition: opacity 500ms;
-  }
+@font-face {
+  font-family: 'Bushiroad';
+  src: url('/fonts/bushiroad.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BrushScriptStd';
+  src: url('/fonts/BrushScriptStd.otf') format('opentype');
+  font-display: swap;
+}
 
   body {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  input {
-    border-radius: 0;
-    border: 0;
-    padding: 10px;
-    position: relative;
-  }
-
-  #username {
-    width: 15em;
-  }
-
-  input[type="submit"] {
-    background-color: #a4a78a;
-    cursor: pointer;
-    color: white;
-    font-weight: bold;
-  }
-
-  .username-alert {
-    position: absolute;
-    top: 2.2em;
-    left: 0;
-    font-size: 16px;
-    color: red;
-    font-style: italic;
-    opacity: 0;
-    background-color: white;
-    padding: 0 5px 0 5px;
-    margin-top: 19px;
-  }
-
-  .show-warning {
-    opacity: 1;
-    animation-name: ascend;
-    animation-duration: 1s;
-    animation-iteration-count: 5;
-  }
-
-  @keyframes ascend {
-    0% {
-      opacity: 1;
-    }
-
-    70% {
-      opacity: 0.3;
-    }
+    font-family: 'Bushiroad', sans-serif;
   }

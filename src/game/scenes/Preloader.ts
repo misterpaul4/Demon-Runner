@@ -19,7 +19,8 @@ export class Preloader extends Scene {
             y: height / 2 - 50,
             text: 'Loading...',
             style: {
-                font: '20px monospace',
+                fontFamily: 'Bushiroad',
+                fontSize: '20px',
                 color: '#ffffff',
             },
         });
@@ -30,7 +31,8 @@ export class Preloader extends Scene {
             y: height / 2 - 5,
             text: '0%',
             style: {
-                font: '18px monospace',
+                fontFamily: 'BrushScriptStd',
+                fontSize: '28px',
                 color: '#ffffff',
             },
         });
@@ -41,7 +43,8 @@ export class Preloader extends Scene {
             y: height / 2 + 50,
             text: '',
             style: {
-                font: '18px monospace',
+                fontFamily: 'Bushiroad',
+                fontSize: '18px',
                 color: '#ffffff',
             },
         });
@@ -81,12 +84,10 @@ export class Preloader extends Scene {
         this.load.audio('run', 'sound/footstep.mp3');
 
         this.load.image('startBtn', 'start_btn.png');
-        this.load.image('leaderboard', 'leaderboard.png');
         this.load.image('ground', 'ground.png');
         this.load.image('gameOver', 'gameOver.png');
         this.load.image('restartBtn', 'restart_btn.png');
         this.load.image('quitBtn', 'quit_btn.png');
-        this.load.image('backBtn', 'back_btn.png');
         this.load.image('resetBtn', 'reset_btn.png');
         this.load.image('muteBtn', 'mute.png');
         this.load.image('unmuteBtn', 'unmute.png');
