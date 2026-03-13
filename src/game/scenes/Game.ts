@@ -2,12 +2,13 @@ import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 
 import Phaser from 'phaser';
-import settings from '../../utils/config';
+import settings, { getPlayerJumpCount, getStoredStars, setStoredStars } from '../../utils/config';
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
     platforms: Phaser.Physics.Arcade.StaticGroup;
     starsGroup: Phaser.Physics.Arcade.Group;
+    spearGroup: Phaser.Physics.Arcade.Group;
     scoreLabel: Phaser.GameObjects.Text;
     scoreValueLabel: Phaser.GameObjects.Text;
     score: number;
@@ -26,6 +27,11 @@ export class Game extends Scene {
     newPlatform: Phaser.Physics.Arcade.Sprite;
     isPaused: boolean;
     pauseLabel: Phaser.GameObjects.Text;
+    currentSpeed: number;
+    currentGroundSpaceRange: [number, number];
+    currentGroundSizeRange: [number, number];
+    currentSpearChance: number;
+    currentBirdModulo: number | null;
 
     constructor() {
         super({
@@ -40,6 +46,10 @@ export class Game extends Scene {
         this.background.setDisplaySize(settings.gameWidth, settings.gameHeight);
         this.platforms = this.physics.add.staticGroup();
         this.starsGroup = this.physics.add.group({
+            allowGravity: false,
+            immovable: true,
+        });
+        this.spearGroup = this.physics.add.group({
             allowGravity: false,
             immovable: true,
         });
@@ -59,7 +69,13 @@ export class Game extends Scene {
 
         // initialize score
         this.score = 0;
-        this.stars = Number(localStorage.getItem('stars') || '0');
+        this.stars = getStoredStars();
+        this.currentSpeed = settings.gameSpeed;
+        this.currentGroundSpaceRange = [...settings.groundSpaceRange] as [number, number];
+        this.currentGroundSizeRange = [...settings.groundSizeRange] as [number, number];
+        this.currentSpearChance = 0;
+        this.currentBirdModulo = null;
+        this.syncDifficulty();
 
         this.add.image(settings.gameWidth - 138, 52, 'star')
             .setScale(0.5)
@@ -113,10 +129,11 @@ export class Game extends Scene {
 
         // initial ground position
         this.groundY = settings.gameHeight - 110;
-        this.groundX = settings.gameWidth + 100;
-
-        // first ground platform
-        this.platforms.create(settings.gameWidth / 2, this.groundY + 30, 'ground');
+        const initialPlatform = this.platforms.create(-120, this.groundY, 'ground').setOrigin(0);
+        initialPlatform.displayWidth = settings.gameWidth + 520;
+        const initialPlatformBody = initialPlatform.body as Phaser.Physics.Arcade.StaticBody;
+        initialPlatformBody.updateFromGameObject();
+        this.groundX = initialPlatform.x + initialPlatform.displayWidth;
 
         this.player = this.physics.add.sprite(110, settings.gameHeight - 170, 'player').setScale(0.1);
 
@@ -125,7 +142,7 @@ export class Game extends Scene {
         this.cameras.main.startFollow(this.player, false, 1, 0, -320, 180);
 
         // set player velocity
-        this.player.setVelocityX(settings.gameSpeed);
+        this.player.setVelocityX(this.currentSpeed);
 
         if (this.input.keyboard) {
             // set space key and up-arrow key for jumping
@@ -137,15 +154,7 @@ export class Game extends Scene {
         }
 
         // initialize number of jumps for the player
-        this.jumps = settings.jumps;
-
-        // timer for raven attack
-        this.time.addEvent({
-            delay: 3000,
-            callback: this.ravenAttack,
-            callbackScope: this,
-            loop: true,
-        });
+        this.jumps = getPlayerJumpCount();
 
         // create 4 platforms
         Array.from({ length: 4 }).forEach(() => this.createPlatform());
@@ -153,14 +162,18 @@ export class Game extends Scene {
         // RAVEN
         this.bird = this.physics.add.sprite(settings.gameWidth + 100, 180, 'bird').setScale(0.17);
         (this.bird.body as Phaser.Physics.Arcade.Body)?.setAllowGravity(false);
+        (this.bird.body as Phaser.Physics.Arcade.Body).enable = false;
+        this.bird.setActive(false).setVisible(false);
 
         // set raven velocity 50 dist/s less than player speed
-        this.bird.setVelocityX(-(settings.gameSpeed - 50));
+        this.bird.setVelocityX(0);
 
         // set collisions
         this.physics.add.collider(this.platforms, this.player, this.hitFloor, undefined, this);
         this.physics.add.collider(this.bird, this.player, this.hitRaven, undefined, this);
+        this.physics.add.collider(this.player, this.spearGroup, this.hitSpear, undefined, this);
         this.physics.add.overlap(this.player, this.starsGroup, this.collectStar, undefined, this);
+        this.syncDifficulty();
 
         if (!this.anims.exists("run")) {
             this.anims.create({
@@ -206,8 +219,9 @@ export class Game extends Scene {
         this.movement();
         this.checkPlatform();
         this.checkStars();
+        this.checkSpears();
         const body = this.player.body as Phaser.Physics.Arcade.Body;
-        if (body && (this.player.y > settings.gameHeight + 40 || body.velocity.x < settings.gameSpeed)) {
+        if (body && (this.player.y > settings.gameHeight + 40 || body.velocity.x < this.currentSpeed - 40)) {
             this.die();
         }
     }
@@ -215,8 +229,9 @@ export class Game extends Scene {
     checkPlatform() {
         this.platforms.getChildren().forEach((platform) => {
             const platformSprite = platform as Phaser.Physics.Arcade.Sprite;
+            const platformRightEdge = platformSprite.x + platformSprite.displayWidth;
 
-            if (this.player.x > (platformSprite.x + 1000)) {
+            if (this.player.x > (platformRightEdge + 320)) {
                 this.createPlatform();
                 this.platforms.remove(platform, true);
             }
@@ -233,13 +248,25 @@ export class Game extends Scene {
         });
     }
 
+    checkSpears() {
+        this.spearGroup.getChildren().forEach((spearObject) => {
+            const spear = spearObject as Phaser.Physics.Arcade.Image;
+
+            if (this.player.x > spear.x + 1000) {
+                this.spearGroup.remove(spear, true, true);
+            }
+        });
+    }
+
     movement() {
-        this.bird.anims.play('fly', true);
+        if (this.bird.active) {
+            this.bird.anims.play('fly', true);
+        }
         if (this.player.body?.touching.down) {
             this.player.anims.play('run', true);
             this.player.clearTint();
             // reset jumps
-            this.jumps = settings.jumps;
+            this.jumps = getPlayerJumpCount();
         }
     }
 
@@ -247,18 +274,44 @@ export class Game extends Scene {
         const platformX = this.groundX;
         this.newPlatform = this.platforms.create(platformX, this.groundY, 'ground').setOrigin(0);
         this.newPlatform.displayWidth = Phaser.Math.Between(
-            settings.groundSizeRange[0], settings.groundSizeRange[1],
+            this.currentGroundSizeRange[0], this.currentGroundSizeRange[1],
         );
 
-        this.spawnStarsForPlatform(platformX, this.newPlatform.displayWidth);
+        const spawnedSpear = this.spawnSpearForPlatform(platformX, this.newPlatform.displayWidth);
+        if (!spawnedSpear) {
+            this.spawnStarsForPlatform(platformX, this.newPlatform.displayWidth);
+        }
         this.groundX += (this.newPlatform.displayWidth + Phaser.Math.Between(
-            settings.groundSpaceRange[0], settings.groundSpaceRange[1],
+            this.currentGroundSpaceRange[0], this.currentGroundSpaceRange[1],
         ));
 
         const {
             body,
         } = this.newPlatform;
         body?.updateFromGameObject();
+    }
+
+    spawnSpearForPlatform(platformX: number, platformWidth: number) {
+        if (this.currentSpearChance <= 0 || platformWidth < 180 || Phaser.Math.Between(0, 100) > this.currentSpearChance) {
+            return false;
+        }
+
+        const spear = this.spearGroup.create(
+            Phaser.Math.Between(platformX + 80, platformX + platformWidth - 80),
+            this.groundY + 4,
+            'spear',
+        ) as Phaser.Physics.Arcade.Image;
+
+        spear.setOrigin(0.5, 1);
+        spear.setScale(0.12);
+        spear.setAngle(90);
+
+        const body = spear.body as Phaser.Physics.Arcade.Body;
+        body.setAllowGravity(false);
+        body.setImmovable(true);
+        body.setSize(42, 126, true);
+
+        return true;
     }
 
     spawnStarsForPlatform(platformX: number, platformWidth: number) {
@@ -311,10 +364,14 @@ export class Game extends Scene {
         this.die();
     }
 
+    hitSpear() {
+        this.die();
+    }
+
     collectStar(_player: Phaser.GameObjects.GameObject, starObject: Phaser.GameObjects.GameObject) {
         const star = starObject as Phaser.Physics.Arcade.Image;
         this.stars += 1;
-        localStorage.setItem('stars', String(this.stars));
+        setStoredStars(this.stars);
         this.starsValueLabel.setText(`${this.stars}`);
 
         this.tweens.killTweensOf(star);
@@ -332,9 +389,13 @@ export class Game extends Scene {
 
 
     ravenAttack() {
+        const body = this.bird.body as Phaser.Physics.Arcade.Body;
+        body.enable = true;
+        this.bird.setActive(true).setVisible(true);
         // reposition raven position
         this.bird.x = this.player.x + 1000;
         this.bird.y = Phaser.Math.Between(180, settings.gameHeight - 170);
+        this.bird.setVelocityX(-(this.currentSpeed - 40));
         !settings.sound && this.sound.play('bird');
     }
 
@@ -361,6 +422,11 @@ export class Game extends Scene {
             this.bestScore = this.score;
             this.bestScoreValueLabel.setText(`${this.score}`);
         }
+
+        this.syncDifficulty();
+        if (this.currentBirdModulo && this.score >= 10 && this.score % this.currentBirdModulo === 0) {
+            this.ravenAttack();
+        }
     }
 
     changeScene() {
@@ -385,5 +451,76 @@ export class Game extends Scene {
 
         this.player.anims.resume();
         this.bird.anims.resume();
+    }
+
+    syncDifficulty() {
+        const difficulty = this.getDifficultyState();
+        this.currentSpeed = difficulty.speed;
+        this.currentGroundSpaceRange = difficulty.groundSpaceRange;
+        this.currentGroundSizeRange = difficulty.groundSizeRange;
+        this.currentSpearChance = difficulty.spearChance;
+        this.currentBirdModulo = difficulty.birdModulo;
+
+        if (this.player?.body) {
+            this.player.setVelocityX(this.currentSpeed);
+        }
+
+        if (this.bird?.body && this.bird.active) {
+            this.bird.setVelocityX(-(this.currentSpeed - 40));
+        }
+    }
+
+    getDifficultyState() {
+        if (this.score < 5) {
+            return {
+                speed: 300,
+                groundSpaceRange: [0, 0] as [number, number],
+                groundSizeRange: [520, 920] as [number, number],
+                spearChance: 0,
+                birdModulo: null,
+            };
+        }
+
+        if (this.score < 30) {
+            return {
+                speed: 330,
+                groundSpaceRange: [36, 110] as [number, number],
+                groundSizeRange: [320, 820] as [number, number],
+                spearChance: 0,
+                birdModulo: null,
+            };
+        }
+
+        if (this.score < 60) {
+            return {
+                speed: 360,
+                groundSpaceRange: [70, 150] as [number, number],
+                groundSizeRange: [240, 700] as [number, number],
+                spearChance: 0,
+                birdModulo: 10,
+            };
+        }
+
+        if (this.score < 120) {
+            return {
+                speed: 385,
+                groundSpaceRange: [90, 180] as [number, number],
+                groundSizeRange: [190, 620] as [number, number],
+                spearChance: 26,
+                birdModulo: 8,
+            };
+        }
+
+        const overtime = this.score - 120;
+        const speedBoost = Math.min(120, Math.floor(overtime * 1.8));
+        const birdModulo = Math.max(4, 7 - Math.floor(overtime / 25));
+
+        return {
+            speed: 405 + speedBoost,
+            groundSpaceRange: [110, 210] as [number, number],
+            groundSizeRange: [160, 540] as [number, number],
+            spearChance: 38,
+            birdModulo,
+        };
     }
 }

@@ -1,34 +1,44 @@
 import Phaser, { Scene } from 'phaser';
-import config from '../../utils/config';
+import config, { getStoredStars, hasTripleJumpUpgrade, setStoredStars, unlockTripleJumpUpgrade } from '../../utils/config';
 import { EventBus } from '../EventBus';
 
 type ShopItemConfig = {
+    id: 'triple_jump' | 'lucky_charm' | 'feather_cape';
     title: string;
     subtitle: string;
     price: number;
+    available: boolean;
 };
 
 const SHOP_ITEMS: ShopItemConfig[] = [
     {
-        title: '疾跑靴',
-        subtitle: '让奔跑速度更快一些',
-        price: 30,
+        id: 'triple_jump',
+        title: '三连跳',
+        subtitle: '希罗刻苦训练后，\n解锁了三连跳',
+        price: 100,
+        available: true,
     },
     {
+        id: 'lucky_charm',
         title: '幸运符',
         subtitle: '之后更容易拿到星星',
         price: 60,
+        available: false,
     },
     {
+        id: 'feather_cape',
         title: '羽披风',
         subtitle: '让二段跳更从容',
         price: 120,
+        available: false,
     },
 ];
 
 const CN_FONT = '"Microsoft YaHei", "PingFang SC", sans-serif';
 
 export class Shop extends Scene {
+    stars: number;
+
     constructor() {
         super('Shop');
     }
@@ -36,7 +46,7 @@ export class Shop extends Scene {
     create() {
         const centerX = config.gameWidth / 2;
         const centerY = config.gameHeight / 2;
-        const stars = Number(localStorage.getItem('stars') || '0');
+        this.stars = getStoredStars();
 
         this.add.image(centerX, centerY, 'background').setDisplaySize(config.gameWidth, config.gameHeight);
         this.add.rectangle(centerX, centerY, config.gameWidth, config.gameHeight, 0x100f12, 0.56);
@@ -53,7 +63,7 @@ export class Shop extends Scene {
             color: '#f7f2e7',
         }).setOrigin(0.5);
 
-        this.createWallet(1100, 108, stars);
+        this.createWallet(1100, 108, this.stars);
         this.createCards(centerX, centerY + 30);
 
         this.createBackLink(140, config.gameHeight - 74);
@@ -89,6 +99,7 @@ export class Shop extends Scene {
 
         SHOP_ITEMS.forEach((item) => {
             const card = this.add.container(currentX, y);
+            const itemState = this.getItemState(item);
 
             const frame = this.add.rectangle(0, 0, cardWidth, 292, 0x121115, 0.84);
             frame.setStrokeStyle(1, 0xf3e8cd, 0.18);
@@ -117,23 +128,43 @@ export class Shop extends Scene {
                 wordWrap: { width: 210 },
             }).setOrigin(0.5);
 
-            const priceBar = this.add.rectangle(0, 106, 146, 48, 0x1c1b21, 0.92);
-            priceBar.setStrokeStyle(1, 0xf3e8cd, 0.16);
+            const actionBar = this.add.rectangle(0, 106, 178, 52, this.getActionColor(itemState), 0.94);
+            actionBar.setStrokeStyle(1, 0xf3e8cd, itemState === 'available' ? 0.24 : 0.12);
 
-            const priceStar = this.add.image(-34, 106, 'star');
-            priceStar.setScale(0.085);
-
-            const price = this.add.text(20, 106, `${item.price}`, {
+            const actionLabel = this.add.text(0, 106, this.getActionLabel(item, itemState), {
                 fontFamily: 'Bushiroad',
-                fontSize: '28px',
-                color: '#fff4cf',
+                fontSize: '24px',
+                color: itemState === 'available' ? '#fff7dd' : '#d6cfbf',
             }).setOrigin(0.5);
 
-            card.add([frame, accent, star, title, subtitle, priceBar, priceStar, price]);
+            const priceStar = this.add.image(-48, 106, 'star');
+            priceStar.setScale(0.075);
+            priceStar.setVisible(itemState === 'available' || itemState === 'locked');
+
+            const price = this.add.text(6, 106, `${item.price}`, {
+                fontFamily: 'Bushiroad',
+                fontSize: '24px',
+                color: '#fff4cf',
+            }).setOrigin(0.5);
+            price.setVisible(itemState === 'available' || itemState === 'locked');
+
+            if (itemState !== 'available' && itemState !== 'locked') {
+                actionLabel.setPosition(0, 106);
+            }
+
+            const hitArea = this.add.zone(0, 106, 178, 52).setOrigin(0.5);
+            if (itemState === 'available') {
+                hitArea.setInteractive({ useHandCursor: true });
+                hitArea.on('pointerup', () => {
+                    this.buyItem(item);
+                });
+            }
+
+            card.add([frame, accent, star, title, subtitle, actionBar, priceStar, price, actionLabel, hitArea]);
             currentX += cardWidth + gap;
         });
 
-        this.add.text(centerX, y + 220, '商店暂时还是展示页，下一步可以接购买逻辑。', {
+        this.add.text(centerX, y + 220, '购买三连跳后，下一局开始就会生效。', {
             fontFamily: CN_FONT,
             fontSize: '22px',
             color: '#d9d3c5',
@@ -155,5 +186,64 @@ export class Shop extends Scene {
         });
 
         this.add.container(x, y, [hitArea, underline, label]).setScrollFactor(0, 1);
+    }
+
+    getItemState(item: ShopItemConfig) {
+        if (item.id === 'triple_jump' && hasTripleJumpUpgrade()) {
+            return 'owned';
+        }
+
+        if (!item.available) {
+            return 'soon';
+        }
+
+        if (this.stars < item.price) {
+            return 'locked';
+        }
+
+        return 'available';
+    }
+
+    getActionLabel(item: ShopItemConfig, state: 'owned' | 'soon' | 'locked' | 'available') {
+        if (state === 'owned') {
+            return 'OWNED';
+        }
+
+        if (state === 'soon') {
+            return 'COMING SOON';
+        }
+
+        if (state === 'locked') {
+            return 'NEED MORE';
+        }
+
+        return `BUY`;
+    }
+
+    getActionColor(state: 'owned' | 'soon' | 'locked' | 'available') {
+        if (state === 'owned') {
+            return 0x2d4d38;
+        }
+
+        if (state === 'available') {
+            return 0x5f4520;
+        }
+
+        if (state === 'locked') {
+            return 0x2b292f;
+        }
+
+        return 0x1f1e24;
+    }
+
+    buyItem(item: ShopItemConfig) {
+        if (item.id !== 'triple_jump' || hasTripleJumpUpgrade() || this.stars < item.price) {
+            return;
+        }
+
+        this.stars -= item.price;
+        setStoredStars(this.stars);
+        unlockTripleJumpUpgrade();
+        this.scene.restart();
     }
 }

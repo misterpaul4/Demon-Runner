@@ -89,6 +89,7 @@ export class Preloader extends Scene {
 
         this.load.image('ground', 'ground.png');
         this.load.image('mocaiyun', 'mocaiyun.png');
+        this.load.image('spear', 'simplespear.png');
         this.load.image('star', 'star.png');
     }
 
