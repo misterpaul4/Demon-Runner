@@ -6,7 +6,6 @@ import { Shop } from './scenes/Shop';
 import { AUTO, Game } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import cg from '../utils/config';
-import '../../public/style.css';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,

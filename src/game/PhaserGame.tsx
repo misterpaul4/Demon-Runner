@@ -1,6 +1,7 @@
-import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import StartGame from "./main";
 import { EventBus } from "./EventBus";
+import { loadGameFonts } from "../utils/loadGameFonts";
 
 export interface IRefPhaserGame {
     game: Phaser.Game | null;
@@ -14,9 +15,22 @@ interface IProps {
 export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
     function PhaserGame({ currentActiveScene }, ref) {
         const game = useRef<Phaser.Game | null>(null!);
+        const [isBooting, setIsBooting] = useState(true);
 
-        useLayoutEffect(() => {
-            if (game.current === null) {
+        useEffect(() => {
+            let mounted = true;
+
+            const bootGame = async () => {
+                try {
+                    await loadGameFonts();
+                } catch (error) {
+                    console.error("Failed to preload game fonts.", error);
+                }
+
+                if (!mounted || game.current !== null) {
+                    return;
+                }
+
                 game.current = StartGame("game-container");
 
                 if (typeof ref === "function") {
@@ -24,9 +38,15 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
                 } else if (ref) {
                     ref.current = { game: game.current, scene: null };
                 }
-            }
+
+                setIsBooting(false);
+            };
+
+            void bootGame();
 
             return () => {
+                mounted = false;
+
                 if (game.current) {
                     game.current.destroy(true);
                     if (game.current !== null) {
@@ -62,7 +82,12 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
             };
         }, [currentActiveScene, ref]);
 
-        return <div id="game-container"></div>;
+        return (
+            <>
+                {isBooting && <div className="game-boot-status">Loading game...</div>}
+                <div id="game-container"></div>
+            </>
+        );
     }
 );
 

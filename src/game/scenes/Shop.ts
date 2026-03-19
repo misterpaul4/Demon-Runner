@@ -57,12 +57,6 @@ export class Shop extends Scene {
             color: '#f3e8cd',
         }).setOrigin(0.5);
 
-        this.add.text(centerX, 170, '之后可以在这里购买升级和外观。', {
-            fontFamily: CN_FONT,
-            fontSize: '24px',
-            color: '#f7f2e7',
-        }).setOrigin(0.5);
-
         this.createWallet(1100, 108, this.stars);
         this.createCards(centerX, centerY + 30);
 
@@ -161,7 +155,7 @@ export class Shop extends Scene {
             currentX += cardWidth + gap;
         });
 
-        this.add.text(centerX, y + 220, '购买三连跳后，下一局开始就会生效。', {
+        this.add.text(centerX, y + 220, '购买道具后，下一回合开始会生效。', {
             fontFamily: CN_FONT,
             fontSize: '22px',
             color: '#d9d3c5',
