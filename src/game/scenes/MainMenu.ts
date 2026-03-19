@@ -37,13 +37,17 @@ export class MainMenu extends Scene {
     preload() {
         this.load.setPath('assets');
 
-        this.load.spritesheet('player', 'characterSprite2.png', {
-          frameWidth: 500,
-          frameHeight: 632,
+        this.load.spritesheet('player', 'characterSprite.png', {
+          frameWidth: 905,
+          frameHeight: 1035,
         });
         this.load.spritesheet('bird', 'bird.png', {
           frameHeight: 341,
           frameWidth: 341,
+        });
+        this.load.spritesheet('warden', 'kanshou.png', {
+          frameHeight: 256,
+          frameWidth: 256,
         });
       }
 

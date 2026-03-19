@@ -20,6 +20,7 @@ export class Game extends Scene {
     groundY: number;
     groundX: number;
     player: Phaser.Physics.Arcade.Sprite;
+    warden: Phaser.GameObjects.Sprite;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     hitGround?: boolean;
     jumps: number;
@@ -136,8 +137,14 @@ export class Game extends Scene {
         this.groundX = initialPlatform.x + initialPlatform.displayWidth;
 
         this.player = this.physics.add.sprite(110, settings.gameHeight - 170, 'player').setScale(0.1);
+        this.player.setDepth(6);
 
         this.player.setBounce(0.15);
+
+        this.warden = this.add.sprite(this.player.x - 340, this.groundY + 18, 'warden');
+        this.warden.setOrigin(0.5, 1);
+        this.warden.setScale(1);
+        this.warden.setDepth(4);
 
         this.cameras.main.startFollow(this.player, false, 1, 0, -320, 180);
 
@@ -210,6 +217,19 @@ export class Game extends Scene {
             });
         }
 
+        if (!this.anims.exists("warden-run")) {
+            this.anims.create({
+                key: 'warden-run',
+                frames: this.anims.generateFrameNumbers('warden', {
+                    frames: [0, 3, 6, 9, 12, 15],
+                }),
+                frameRate: 16,
+                repeat: -1,
+            });
+        }
+
+        this.warden.anims.play('warden-run');
+
         EventBus.emit('current-scene-ready', this);
     }
 
@@ -218,6 +238,7 @@ export class Game extends Scene {
             return;
         }
         this.movement();
+        this.updateWardenChase();
         this.checkPlatform();
         this.checkStars();
         this.checkSpears();
@@ -268,6 +289,20 @@ export class Game extends Scene {
             this.player.clearTint();
             // reset jumps
             this.jumps = getPlayerJumpCount();
+        }
+    }
+
+    updateWardenChase() {
+        const pressure = Math.min(150, this.score * 1.4);
+        const targetOffset = Math.max(140, 300 - pressure);
+        const targetX = this.player.x - targetOffset;
+        const followRate = this.player.body?.touching.down ? 0.032 : 0.05;
+
+        this.warden.x = Phaser.Math.Linear(this.warden.x, targetX, followRate);
+        this.warden.y = this.groundY  - 0;
+
+        if ((this.player.x - this.warden.x) < 96) {
+            this.die();
         }
     }
 
@@ -381,6 +416,9 @@ export class Game extends Scene {
 
     die() {
         !settings.sound && this.sound.play('gameOver');
+        this.player.anims.pause();
+        this.bird.anims.pause();
+        this.warden.anims.pause();
         this.scene.pause('Game');
         const bestScore = Math.max(this.score, Number(settings.bestScore));
         settings.bestScore = bestScore;
@@ -447,11 +485,13 @@ export class Game extends Scene {
         if (this.isPaused) {
             this.player.anims.pause();
             this.bird.anims.pause();
+            this.warden.anims.pause();
             return;
         }
 
         this.player.anims.resume();
         this.bird.anims.resume();
+        this.warden.anims.resume();
     }
 
     syncDifficulty() {
@@ -475,7 +515,7 @@ export class Game extends Scene {
         if (this.score < 30) {
             return {
                 speed: 330,
-                groundSpaceRange: [36, 110] as [number, number],
+                groundSpaceRange: [120, 220] as [number, number],
                 groundSizeRange: [320, 820] as [number, number],
                 spearChance: 0,
                 birdModulo: null,
@@ -485,7 +525,7 @@ export class Game extends Scene {
         if (this.score < 60) {
             return {
                 speed: 360,
-                groundSpaceRange: [70, 150] as [number, number],
+                groundSpaceRange: [130, 240] as [number, number],
                 groundSizeRange: [240, 700] as [number, number],
                 spearChance: 0,
                 birdModulo: 10,
@@ -495,7 +535,7 @@ export class Game extends Scene {
         if (this.score < 120) {
             return {
                 speed: 385,
-                groundSpaceRange: [90, 180] as [number, number],
+                groundSpaceRange: [140, 260] as [number, number],
                 groundSizeRange: [190, 620] as [number, number],
                 spearChance: 26,
                 birdModulo: 8,
@@ -508,7 +548,7 @@ export class Game extends Scene {
 
         return {
             speed: 405 + speedBoost,
-            groundSpaceRange: [110, 210] as [number, number],
+            groundSpaceRange: [150, 300] as [number, number],
             groundSizeRange: [160, 540] as [number, number],
             spearChance: 38,
             birdModulo,
