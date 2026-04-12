@@ -65,21 +65,20 @@ body {
   width: 64px;
   height: 64px;
   padding: 0;
-  border: 3px solid #c93a2f;
+  border: 1px solid rgba(244, 240, 216, 0.22);
   border-radius: 4px;
   background: rgba(20, 18, 19, 0.95);
-  box-shadow: 4px 4px 0px rgba(201, 58, 47, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
   color: #eff4ee;
   cursor: pointer;
   backdrop-filter: blur(10px);
-  transition: all 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
   z-index: 100 !important;
 }
 
 .menu-audio-toggle:hover,
 .menu-shop-toggle:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px rgba(201, 58, 47, 0.6);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
   border-color: #fff;
 }
 
