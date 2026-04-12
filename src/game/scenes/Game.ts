@@ -33,18 +33,34 @@ export class Game extends Scene {
     currentGroundSizeRange: [number, number];
     currentSpearChance: number;
     currentBirdModulo: number | null;
+    pointerJumpHandler: (pointer: Phaser.Input.Pointer) => void;
 
     constructor() {
         super({
             key: 'Game',
         });
+        this.pointerJumpHandler = (pointer: Phaser.Input.Pointer) => {
+            if (pointer.rightButtonDown()) {
+                return;
+            }
+
+            this.jump();
+        };
     }
 
     create() {
         this.isPaused = false;
-        this.background = this.add.image(settings.gameWidth / 2, settings.gameHeight / 2, 'background')
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+
+        this.background = this.add.image(width / 2, height / 2, 'background')
             .setScrollFactor(0, 1);
-        this.background.setDisplaySize(settings.gameWidth, settings.gameHeight);
+        
+        const scaleX = width / this.background.width;
+        const scaleY = height / this.background.height;
+        const scale = Math.max(scaleX, scaleY);
+        this.background.setScale(scale);
+        this.background.setDepth(-10);
         this.platforms = this.physics.add.staticGroup();
         this.starsGroup = this.physics.add.group({
             allowGravity: false,
@@ -160,6 +176,8 @@ export class Game extends Scene {
             this.input.keyboard.on('keydown-ESC', this.togglePause, this);
         }
 
+        this.input.on('pointerdown', this.pointerJumpHandler, this);
+
         // initialize number of jumps for the player
         this.jumps = getPlayerJumpCount();
 
@@ -231,6 +249,9 @@ export class Game extends Scene {
         this.warden.anims.play('warden-run');
 
         EventBus.emit('current-scene-ready', this);
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.input.off('pointerdown', this.pointerJumpHandler, this);
+        });
     }
 
     update() {
@@ -410,20 +431,37 @@ export class Game extends Scene {
         setStoredStars(this.stars);
         this.starsValueLabel.setText(`${this.stars}`);
 
+        // Pulse effect for stars label
+        this.tweens.add({
+            targets: this.starsValueLabel,
+            scale: 1.4,
+            duration: 100,
+            yoyo: true,
+            ease: 'Back.easeOut'
+        });
+
         this.tweens.killTweensOf(star);
         star.disableBody(true, true);
     }
 
     die() {
         !settings.sound && this.sound.play('gameOver');
+        
+        // Impact shake on death
+        this.cameras.main.shake(400, 0.015);
+        this.cameras.main.flash(200, 201, 58, 47, 0.6); // Red flash
+
         this.player.anims.pause();
         this.bird.anims.pause();
         this.warden.anims.pause();
-        this.scene.pause('Game');
-        const bestScore = Math.max(this.score, Number(settings.bestScore));
-        settings.bestScore = bestScore;
-        localStorage.setItem('bestScore', String(bestScore));
-        this.scene.launch('GameOver', this);
+        
+        this.time.delayedCall(300, () => {
+            this.scene.pause('Game');
+            const bestScore = Math.max(this.score, Number(settings.bestScore));
+            settings.bestScore = bestScore;
+            localStorage.setItem('bestScore', String(bestScore));
+            this.scene.launch('GameOver', this);
+        });
     }
 
 
@@ -450,16 +488,29 @@ export class Game extends Scene {
             this.player.setTint(0xff0000);
             this.jumps -= 1;
             this.hitGround = false;
+
+            // Add slight camera shake on jump for impact
+            this.cameras.main.shake(100, 0.002);
         }
     }
 
     updateTimer() {
         this.score += 1;
         this.scoreValueLabel.setText(`${this.score}`);
+        
+        // Subtle pulse for every second passed
+        this.tweens.add({
+            targets: this.scoreValueLabel,
+            scale: 1.15,
+            duration: 80,
+            yoyo: true
+        });
+
         // check for new best
         if (this.score > Number(this.bestScore)) {
             this.bestScore = this.score;
             this.bestScoreValueLabel.setText(`${this.score}`);
+            this.bestScoreValueLabel.setTint(0xffea00); // Highlight best score
         }
 
         this.syncDifficulty();

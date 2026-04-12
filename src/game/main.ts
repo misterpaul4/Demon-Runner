@@ -3,7 +3,7 @@ import { GameOver } from './scenes/GameOver';
 import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
 import { Shop } from './scenes/Shop';
-import { AUTO, Game } from 'phaser';
+import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import cg from '../utils/config';
 
@@ -12,6 +12,12 @@ const config: Phaser.Types.Core.GameConfig = {
     width: cg.gameWidth,
     height: cg.gameHeight,
     parent: 'game-container',
+    scale: {
+        mode: Scale.FIT,
+        autoCenter: Scale.CENTER_BOTH,
+        width: cg.gameWidth,
+        height: cg.gameHeight,
+    },
     dom: {
         createContainer: true,
     },

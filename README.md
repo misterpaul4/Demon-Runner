@@ -15,6 +15,12 @@
 
 当前版本是纯本地单机玩法。玩家点击开始后直接进入游戏，通过跳跃躲避障碍并尽可能存活更长时间。游戏会在浏览器本地保存最佳成绩和音效开关状态。
 
+当前版本也已经补上了 Tauri Android 支持：
+
+- 移动端会自动检测并尽量默认横屏
+- Android 原生壳默认使用横屏方向启动
+- 游戏内支持键盘、鼠标点击和手指点击跳跃
+
 ## 原项目来源
 
 本项目基于以下开源仓库进行二次创作：
@@ -57,8 +63,99 @@ npm run build
 
 - 点击开始按钮进入游戏
 - 使用 `Space` 或 `↑` 进行跳跃
+- 在游戏画面中使用鼠标左键或手指点击屏幕也可以跳跃
 - 尽量避开敌人和掉落
 - 存活时间越长，分数越高
+
+## Tauri Android
+
+### 1. 初始化 Android 工程
+
+如果仓库里还没有 `src-tauri/gen/android`，先执行：
+
+```bash
+npm run tauri:android:init
+```
+
+### 2. 启动 Android 开发版
+
+连接真机或启动模拟器后执行：
+
+```bash
+npm run tauri:android:dev
+```
+
+### 3. 打包 Android APK
+
+生成调试 APK：
+
+```bash
+npm run tauri:android:build -- --debug --apk -t aarch64 --ci
+```
+
+生成发布 APK：
+
+```bash
+npm run tauri:android:build -- --apk --ci
+```
+
+如果你要拿给真机直接安装，先初始化本地 release 签名：
+
+```bash
+npm run tauri:android:signing:init
+```
+
+然后再执行发布打包命令。签名成功后，常见输出会变成：
+
+```text
+src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
+```
+
+如果你想减小包体，建议按 ABI 分包：
+
+```bash
+npm run tauri:android:build -- --apk --split-per-abi --ci
+```
+
+常见输出目录：
+
+```text
+src-tauri/gen/android/app/build/outputs/apk/
+```
+
+### 4. Android 环境变量
+
+当前这套工程依赖以下环境变量：
+
+- `JAVA_HOME`
+- `ANDROID_HOME`
+- `NDK_HOME`
+
+如果你刚写入过这些变量，记得重开一个终端再执行打包命令。
+
+### 5. Android release 签名文件
+
+本地签名初始化脚本会生成两份只保存在你机器上的文件：
+
+- `src-tauri/gen/android/key.properties`
+- `src-tauri/gen/android/keystore/hiro-run-release.jks`
+
+这两份文件已经写进 `.gitignore`，不会被提交进仓库。
+
+## 图标生成
+
+仓库根目录的 `logo.png` 不会被 Tauri 自动读取。Tauri 真正使用的是 [src-tauri/tauri.conf.json](./src-tauri/tauri.conf.json) 里声明的 `src-tauri/icons/*` 文件。
+
+如果你更新了 `logo.png`，现在可以直接执行：
+
+```bash
+npm run tauri:icon
+```
+
+这个脚本会做两件事：
+
+1. 把 `logo.png` 补成适合做应用图标的方形透明底图
+2. 重新生成 `src-tauri/icons` 和 `public/favicon.png`
 
 ## 项目结构
 

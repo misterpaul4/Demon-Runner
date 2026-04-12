@@ -10,6 +10,11 @@ type ShopItemConfig = {
     available: boolean;
 };
 
+type ShopCardDisplay = {
+    title: string;
+    subtitle: string;
+};
+
 const SHOP_ITEMS: ShopItemConfig[] = [
     {
         id: 'triple_jump',
@@ -94,6 +99,7 @@ export class Shop extends Scene {
         SHOP_ITEMS.forEach((item) => {
             const card = this.add.container(currentX, y);
             const itemState = this.getItemState(item);
+            const display = this.getCardDisplay(item);
 
             const frame = this.add.rectangle(0, 0, cardWidth, 292, 0x121115, 0.84);
             frame.setStrokeStyle(1, 0xf3e8cd, 0.18);
@@ -105,7 +111,7 @@ export class Shop extends Scene {
             star.setScale(0.13);
             star.setAngle(-8);
 
-            const title = this.add.text(0, -20, item.title, {
+            const title = this.add.text(0, -20, display.title, {
                 fontFamily: CN_FONT,
                 fontSize: '30px',
                 color: '#f3e8cd',
@@ -114,7 +120,7 @@ export class Shop extends Scene {
                 wordWrap: { width: 210 },
             }).setOrigin(0.5);
 
-            const subtitle = this.add.text(0, 36, item.subtitle, {
+            const subtitle = this.add.text(0, 36, display.subtitle, {
                 fontFamily: CN_FONT,
                 fontSize: '22px',
                 color: '#efe9dc',
@@ -195,13 +201,27 @@ export class Shop extends Scene {
         return 'available';
     }
 
+    getCardDisplay(item: ShopItemConfig): ShopCardDisplay {
+        if (!item.available) {
+            return {
+                title: '未解锁',
+                subtitle: '',
+            };
+        }
+
+        return {
+            title: item.title,
+            subtitle: item.subtitle,
+        };
+    }
+
     getActionLabel(state: 'owned' | 'soon' | 'locked' | 'available') {
         if (state === 'owned') {
             return '已拥有';
         }
 
         if (state === 'soon') {
-            return '敬请期待';
+            return '未解锁';
         }
 
         if (state === 'locked') {

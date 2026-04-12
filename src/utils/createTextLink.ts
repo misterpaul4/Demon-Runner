@@ -43,20 +43,19 @@ const createTextLink = (
 
     const hitWidth = Math.max(text.width + (options.backgroundPaddingX ?? 48), options.minBackgroundWidth ?? 0);
     const hitHeight = options.backgroundHeight ?? Math.max(text.height + underlineOffsetY + underlineThickness + 24, 72);
-    const hitArea = scene.add.zone(0, underline.y / 2, hitWidth, hitHeight);
-
-    const container = scene.add.container(x, y, [hitArea, underline, text]);
+    const container = scene.add.container(x, y, [underline, text]);
     container.setSize(hitWidth, hitHeight);
-    hitArea.setInteractive(
-        new Phaser.Geom.Rectangle(-hitWidth / 2, -hitHeight / 2, hitWidth, hitHeight),
+
+    // Ensure the interactive area is centered relative to the container's contents
+    container.setInteractive(
+        new Phaser.Geom.Rectangle(0, 0, hitWidth, hitHeight),
         Phaser.Geom.Rectangle.Contains,
-        true,
     );
-    if (hitArea.input) {
-        hitArea.input.cursor = 'pointer';
+    if (container.input) {
+        container.input.cursor = 'pointer';
     }
 
-    hitArea.on('pointerup', onClick);
+    container.on('pointerup', onClick);
 
     return container;
 };

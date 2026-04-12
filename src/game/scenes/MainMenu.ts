@@ -55,14 +55,43 @@ export class MainMenu extends Scene {
         const centerX = config.gameWidth / 2;
         const centerY = config.gameHeight / 2;
 
-        this.background = this.add.image(centerX, centerY, 'background');
-        this.background.setDisplaySize(config.gameWidth, config.gameHeight);
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
 
-        this.add.text(centerX, 150, 'HIRO RUN', {
+        this.background = this.add.image(width / 2, height / 2, 'background');
+        
+        // Calculate scale to fill screen while keeping aspect ratio (Cover)
+        const scaleX = width / this.background.width;
+        const scaleY = height / this.background.height;
+        const scale = Math.max(scaleX, scaleY);
+        this.background.setScale(scale).setScrollFactor(0);
+        this.background.setDepth(-10);
+
+        const title = this.add.text(centerX, 150, 'HIRO RUN', {
             fontFamily: 'Bushiroad',
-            fontSize: '84px',
+            fontSize: '92px',
             color: '#c93a2f',
         }).setOrigin(0.5);
+
+        // Add a floating animation to the title
+        this.tweens.add({
+            targets: title,
+            y: 160,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        // Add a slight color shift/glow to the title
+        this.tweens.add({
+            targets: title,
+            alpha: 0.8,
+            duration: 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Quad.easeInOut'
+        });
 
         this.startBtn = createTextLink(this, centerX, 0, 'start game', this.changeScene.bind(this), {
             fontSize: 40,

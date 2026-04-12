@@ -23,5 +23,32 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+*.psd
 
 public/fonts/
+public/assets/psd/
+
+# Tauri / Rust
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Tauri Android generated/local build files
+src-tauri/gen/android/.gradle/
+src-tauri/gen/android/build/
+src-tauri/gen/android/local.properties
+src-tauri/gen/android/.tauri/
+src-tauri/gen/android/tauri.settings.gradle
+src-tauri/gen/android/captures/
+src-tauri/gen/android/.externalNativeBuild/
+src-tauri/gen/android/.cxx/
+src-tauri/gen/android/key.properties
+src-tauri/gen/android/keystore/
+
+# Tauri Android app generated outputs
+src-tauri/gen/android/app/build/
+src-tauri/gen/android/app/src/main/**/generated/
+src-tauri/gen/android/app/src/main/jniLibs/**/*.so
+src-tauri/gen/android/app/src/main/assets/tauri.conf.json
+src-tauri/gen/android/app/tauri.build.gradle.kts
+src-tauri/gen/android/app/proguard-tauri.pro
+src-tauri/gen/android/app/tauri.properties
