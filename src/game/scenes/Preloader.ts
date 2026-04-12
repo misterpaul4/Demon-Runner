@@ -88,12 +88,32 @@ export class Preloader extends Scene {
         this.load.audio('run', 'sound/footstep.mp3');
 
         this.load.image('ground', 'ground.png');
-        this.load.image('mocaiyun', 'mocaiyun.png');
         this.load.image('spear', 'simplespear.png');
         this.load.image('star', 'star.png');
     }
 
     create() {
+        void this.startMainMenuWhenFontsReady();
+    }
+
+    private async startMainMenuWhenFontsReady() {
+        if ('fonts' in document) {
+            try {
+                const fontFaceSet = document.fonts;
+                await Promise.race([
+                    Promise.all([
+                        fontFaceSet.load('84px "Bushiroad"'),
+                        fontFaceSet.load('28px "BrushScriptStd"'),
+                    ]),
+                    new Promise((resolve) => {
+                        window.setTimeout(resolve, 3000);
+                    }),
+                ]);
+            } catch {
+                // Continue into the menu even if the browser cannot pre-load fonts explicitly.
+            }
+        }
+
         this.scene.start('MainMenu');
     }
 }
