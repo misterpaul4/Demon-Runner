@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dev-dist
 *.local
 
 # Editor directories and files
@@ -24,5 +25,4 @@ dist-ssr
 *.sw?
 *.env
 
-# Claude Code local config / worktrees
 .claude/

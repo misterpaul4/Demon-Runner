@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { pwa } from './pwa.mjs';
 
 const phasermsg = () => {
     return {
@@ -21,6 +22,7 @@ export default defineConfig({
     base: './',
     plugins: [
         react(),
+        pwa(),
         phasermsg()
     ],
     logLevel: 'warning',
