@@ -1,95 +1,153 @@
-import { GameObjects, Scene } from 'phaser';
-
+import Phaser, { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
-import hoverEffect from '../../utils/hoverEffect';
-import Form from '../../utils/usernameForm';
 import config from '../../utils/config';
+import { TEX, DEMONS, demonTex } from '../systems/art';
+import { Background } from '../world/Background';
+import { Button } from '../ui/Button';
+import { NameEntry } from '../ui/NameEntry';
+import { applyMute, toggleSound } from '../systems/audio';
 import { fetchUserBestScore } from '../../utils/leaderBoardAPI';
+
 export class MainMenu extends Scene {
-    background: GameObjects.Image;
-    startBtn: GameObjects.Image;
-    resetBtn: GameObjects.Image;
-    leaderboardBtn: GameObjects.Image;
-    audioBtn: GameObjects.Image;
+    private background!: Background;
+    private demonImg!: Phaser.GameObjects.Image;
+    private demonGlow!: Phaser.GameObjects.Image;
+    private demonName!: Phaser.GameObjects.Text;
+    private nameEntry!: NameEntry;
+    private soundBtn!: Button;
+    private demonBaseY = 296;
 
     constructor() {
         super('MainMenu');
     }
 
-    preload() {
-        this.load.setPath('assets');
-
-        this.load.spritesheet('player', 'characterSprite2.png', {
-          frameWidth: 500,
-          frameHeight: 632,
-        });
-        this.load.spritesheet('bird', 'birdSprite.png', {
-          frameHeight: 416,
-          frameWidth: 416,
-        });
-      }
-
     create() {
-        this.background = this.add.image(400, 225, 'background');
-        this.startBtn = this.add.image(400, 150, 'startBtn');
-        this.resetBtn = this.add.image(400, 230, 'resetBtn');
-        this.leaderboardBtn = this.add.image(400, 350, 'leaderboard');
-        this.audioBtn = this.add.image(80, 400, config.sound ? 'muteBtn' : 'unmuteBtn');
-        this.sound.mute = config.sound;
+        applyMute(this);
+        const cx = config.width / 2;
 
-        // Add hover effects
-        hoverEffect(this.startBtn, 1.05);
-        hoverEffect(this.resetBtn, 1.05);
-        hoverEffect(this.leaderboardBtn, 1.05);
-        hoverEffect(this.audioBtn, 1.05);
+        this.background = new Background(this);
+        this.buildHero(cx, this.demonBaseY);
 
+        this.add.text(cx, 112, 'DEMON RUNNER', {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '74px',
+            color: config.theme.css.parchment,
+            fontStyle: '900',
+        }).setOrigin(0.5).setShadow(0, 0, config.theme.css.ember, 24).setDepth(20);
+
+        this.add.text(cx, 166, 'dodge the murder · outrun the dark', {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '18px',
+            color: config.theme.css.ash,
+        }).setOrigin(0.5).setDepth(20);
+
+        this.nameEntry = new NameEntry(this, cx, 452, config.username, () => this.play());
+
+        new Button(this, cx, 530, 'Play', () => this.play(), { width: 300, height: 64, fontSize: 26 });
+        new Button(this, cx, 604, 'Leaderboard', () => this.scene.start('Rank'), {
+            width: 300, height: 54, variant: 'ghost', fontSize: 18,
+        });
+
+        this.soundBtn = new Button(this, config.width - 110, 668, this.soundLabel(), () => {
+            toggleSound(this);
+            this.soundBtn.setText(this.soundLabel());
+        }, { width: 168, height: 46, variant: 'ghost', fontSize: 15 });
+
+        new Button(this, 110, 668, 'Reset', () => {
+            localStorage.clear();
+            config.username = '';
+            config.bestScore = 0;
+            config.character = 'reaper';
+            this.scene.restart();
+        }, { width: 168, height: 46, variant: 'ghost', fontSize: 15 });
+
+        this.events.once('shutdown', () => this.nameEntry.destroy());
         EventBus.emit('current-scene-ready', this);
-
-    if (config.username) {
-      Form.display(config.username, this);
-    } else {
-      Form.enter(this);
     }
 
-    this.startBtn.on('pointerup', this.changeScene.bind(this));
-
-    this.resetBtn.on('pointerup', () => {
-      localStorage.clear();
-      window.location.reload();
-    });
-
-    this.leaderboardBtn.on('pointerup', () => {
-      this.scene.start('Rank');
-    });
-
-    this.audioBtn.on('pointerup', () => {
-      config.sound = !config.sound;
-      this.sound.mute = config.sound;
-
-      if (config.sound) {
-        this.audioBtn.setTexture('muteBtn');
-      } else {
-        this.audioBtn.setTexture('unmuteBtn');
-      }
-
-      localStorage.setItem('sound', String(config.sound));
-    });
-
-    this.events.on('shutdown', () => {
-      Form.remove();
-    });
+    private soundLabel() {
+        return config.sound ? '♪  sound on' : '♪  sound off';
     }
 
-    async changeScene() {
-        if (config.username) {
-            if (!config.bestScore) {
-                await fetchUserBestScore();
-            }
-            this.scene.start('Game');
-          } else {
-            // display warning
-            const alertBox = document.querySelector('.username-alert');
-            alertBox?.classList.add('show-warning');
-          }
+    private buildHero(x: number, y: number) {
+        this.demonGlow = this.add.image(x, y, TEX.glow)
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setTint(config.theme.ember)
+            .setAlpha(0.32)
+            .setScale(2.4)
+            .setDepth(9);
+
+        this.demonImg = this.add.image(x, y, demonTex(config.character)).setScale(1.5).setDepth(11);
+
+        this.add.particles(x, y + 78, TEX.ember, {
+            speed: { min: 10, max: 36 },
+            angle: { min: 240, max: 300 },
+            lifespan: { min: 500, max: 1100 },
+            scale: { start: 0.7, end: 0 },
+            alpha: { start: 0.6, end: 0 },
+            tint: [config.theme.ember, config.theme.emberHot],
+            blendMode: 'ADD',
+            frequency: 60,
+        }).setDepth(10);
+
+        this.demonName = this.add.text(x, y + 116, this.currentDemon().name, {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '22px',
+            color: config.theme.css.ember,
+        }).setOrigin(0.5).setDepth(20);
+
+        this.makeArrow(x - 152, y, '‹', -1);
+        this.makeArrow(x + 152, y, '›', 1);
+    }
+
+    private makeArrow(x: number, y: number, glyph: string, dir: number) {
+        const arrow = this.add.text(x, y, glyph, {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '60px',
+            color: config.theme.css.ash,
+        }).setOrigin(0.5).setDepth(20).setInteractive({ useHandCursor: true });
+
+        arrow.on('pointerover', () => arrow.setColor(config.theme.css.ember));
+        arrow.on('pointerout', () => arrow.setColor(config.theme.css.ash));
+        arrow.on('pointerup', () => this.cycleDemon(dir));
+    }
+
+    private currentDemon() {
+        return DEMONS.find((d) => d.id === config.character) ?? DEMONS[0];
+    }
+
+    private cycleDemon(dir: number) {
+        const ids = DEMONS.map((d) => d.id);
+        let i = ids.indexOf(config.character as (typeof ids)[number]);
+        if (i < 0) i = 0;
+        i = (i + dir + ids.length) % ids.length;
+
+        config.character = ids[i];
+        localStorage.setItem(config.storageKeys.character, config.character);
+
+        this.demonImg.setTexture(DEMONS[i].tex);
+        this.demonName.setText(DEMONS[i].name);
+        this.demonImg.setScale(1.25);
+        this.tweens.add({ targets: this.demonImg, scale: 1.5, duration: 240, ease: 'Back.easeOut' });
+    }
+
+    private play() {
+        // Strip characters Firebase forbids in a database key (. # $ [ ] /) so
+        // the name can be used directly as the leaderboard key.
+        const name = this.nameEntry.value.toLowerCase().replace(/[.#$[\]/]/g, '').trim();
+        if (!name) {
+            this.nameEntry.flash();
+            return;
+        }
+        config.username = name;
+        localStorage.setItem(config.storageKeys.username, name);
+        fetchUserBestScore().finally(() => this.scene.start('Game'));
+    }
+
+    update(time: number) {
+        this.background.update(time * 0.04, 0);
+        const bob = Math.sin(time * 0.002) * 10;
+        this.demonImg.y = this.demonBaseY + bob;
+        this.demonGlow.y = this.demonBaseY + bob;
     }
 }

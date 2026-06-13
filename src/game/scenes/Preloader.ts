@@ -1,4 +1,6 @@
 import { Scene } from 'phaser';
+import { buildTextures } from '../systems/art';
+import config from '../../utils/config';
 
 export class Preloader extends Scene {
     constructor() {
@@ -6,93 +8,61 @@ export class Preloader extends Scene {
     }
 
     init() {
-        // display progress bar
-        const progressBar = this.add.graphics();
-        const progressBox = this.add.graphics();
-        progressBox.fillStyle(0x222222, 0.8);
-        progressBox.fillRect(240, 270, 320, 50);
+        const { width, height } = this.scale;
+        const cx = width / 2;
+        const cy = height / 2;
 
-        const { width } = this.cameras.main;
-        const { height } = this.cameras.main;
-        const loadingText = this.make.text({
-            x: width / 2,
-            y: height / 2 - 50,
-            text: 'Loading...',
-            style: {
-                font: '20px monospace',
-                color: '#ffffff',
-            },
-        });
-        loadingText.setOrigin(0.5, 0.5);
+        this.add.text(cx, cy - 70, 'DEMON RUNNER', {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '46px',
+            color: config.theme.css.parchment,
+        }).setOrigin(0.5).setAlpha(0.9);
 
-        const percentText = this.make.text({
-            x: width / 2,
-            y: height / 2 - 5,
-            text: '0%',
-            style: {
-                font: '18px monospace',
-                color: '#ffffff',
-            },
-        });
-        percentText.setOrigin(0.5, 0.5);
+        const barW = 360;
+        const barX = cx - barW / 2;
+        const barY = cy + 10;
 
-        const assetText = this.make.text({
-            x: width / 2,
-            y: height / 2 + 50,
-            text: '',
-            style: {
-                font: '18px monospace',
-                color: '#ffffff',
-            },
-        });
-        assetText.setOrigin(0.5, 0.5);
+        const frame = this.add.graphics();
+        frame.lineStyle(2, config.theme.ember, 0.8);
+        frame.strokeRect(barX - 2, barY - 2, barW + 4, 16);
 
-        // update progress bar
-        this.load.on('progress', (value: number) => {
-            // eslint-disable-next-line radix
-            percentText.setText(`${parseInt(String(value * 100))}%`);
-            progressBar.clear();
-            progressBar.fillStyle(0xffffff, 1);
-            progressBar.fillRect(250, 280, 300 * value, 30);
-        });
+        const fill = this.add.graphics();
+        fill.fillStyle(config.theme.ember, 1);
+        fill.fillRect(barX, barY, barW, 12);
 
-        // update file progress text
-        this.load.on('fileprogress', (file: { key: string }) => {
-            assetText.setText(`Loading asset: ${file.key}`);
-        });
-
-        // remove progress bar when complete
-        this.load.on('complete', () => {
-            progressBar.destroy();
-            progressBox.destroy();
-            loadingText.destroy();
-            percentText.destroy();
-            assetText.destroy();
-        });
+        this.add.text(cx, barY + 38, 'summoning…', {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '15px',
+            color: config.theme.css.ash,
+        }).setOrigin(0.5);
     }
 
     preload() {
-        this.load.setPath('assets');
-
-        this.load.audio('bird', 'sound/crow.mp3');
-        this.load.audio('hitGround', 'sound/hitGround.mp3');
-        this.load.audio('gameOver', 'sound/gameOver.mp3');
-        this.load.audio('jump', 'sound/jump.mp3');
-        this.load.audio('run', 'sound/footstep.mp3');
-
-        this.load.image('startBtn', 'start_btn.png');
-        this.load.image('leaderboard', 'leaderboard.png');
-        this.load.image('ground', 'ground.png');
-        this.load.image('gameOver', 'gameOver.png');
-        this.load.image('restartBtn', 'restart_btn.png');
-        this.load.image('quitBtn', 'quit_btn.png');
-        this.load.image('backBtn', 'back_btn.png');
-        this.load.image('resetBtn', 'reset_btn.png');
-        this.load.image('muteBtn', 'mute.png');
-        this.load.image('unmuteBtn', 'unmute.png');
+        // Only the procedurally generated art is needed before the menu. Audio
+        // is handled by the AudioBoot scene, which runs in parallel so a slow or
+        // stalled audio load can never hold up the menu.
+        buildTextures(this);
     }
 
-    create() {
+    async create() {
+        // Give the display font a moment to arrive (it's baked into text at
+        // creation), but never wait on it indefinitely.
+        await Promise.race([this.loadFonts(), this.delay(2000)]);
+        this.scene.launch('AudioBoot');
         this.scene.start('MainMenu');
+    }
+
+    private delay(ms: number) {
+        return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    private async loadFonts() {
+        const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+        if (!fonts?.load) return;
+        try {
+            await Promise.all([fonts.load('700 40px Cinzel'), fonts.load('400 20px Cinzel')]);
+        } catch {
+            // Serif fallback is fine if the font CDN is unreachable.
+        }
     }
 }

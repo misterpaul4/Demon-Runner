@@ -1,67 +1,90 @@
-form {
-    font-size: 25px;
-    padding: 7px;
-    position: absolute;
-    top: 20px;
-    transform: translateX(-50%);
-    left: 50%;
-    border: 3px solid #a4a78a;
-    background-color: #010001;
-    color: white;
-    display: flex;
-    transition: opacity 500ms;
-  }
+:root {
+    color-scheme: dark;
+}
 
-  body {
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #05040a;
+    font-family: 'Cinzel', Georgia, serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#root,
+#app,
+#game-container {
+    width: 100%;
+    height: 100%;
+}
+
+#app {
     display: flex;
-    justify-content: center;
     align-items: center;
-  }
+    justify-content: center;
+    /* A faint ember vignette behind the letterboxed canvas so the bars read as
+       part of the world rather than dead black. */
+    background:
+        radial-gradient(120% 80% at 50% 0%, #1a0c1e 0%, #05040a 60%),
+        #05040a;
+}
 
-  input {
-    border-radius: 0;
-    border: 0;
-    padding: 10px;
-    position: relative;
-  }
+canvas {
+    display: block;
+    touch-action: none;
+}
 
-  #username {
-    width: 15em;
-  }
+#rotate-hint {
+    display: none;
+}
 
-  input[type="submit"] {
-    background-color: #a4a78a;
-    cursor: pointer;
-    color: white;
-    font-weight: bold;
-  }
-
-  .username-alert {
-    position: absolute;
-    top: 2.2em;
-    left: 0;
-    font-size: 16px;
-    color: red;
-    font-style: italic;
-    opacity: 0;
-    background-color: white;
-    padding: 0 5px 0 5px;
-    margin-top: 19px;
-  }
-
-  .show-warning {
-    opacity: 1;
-    animation-name: ascend;
-    animation-duration: 1s;
-    animation-iteration-count: 5;
-  }
-
-  @keyframes ascend {
-    0% {
-      opacity: 1;
+/* On a portrait phone the 16:9 play area shrinks to a thin band, so prompt the
+   player to rotate rather than squinting at a letterboxed sliver. */
+@media (orientation: portrait) and (max-width: 900px) {
+    #rotate-hint {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        background:
+            radial-gradient(120% 80% at 50% 30%, #1a0c1e 0%, #05040a 65%),
+            #05040a;
+        color: #f3e9da;
     }
 
-    70% {
-      opacity: 0.3;
+    .rotate-glyph {
+        font-size: 3.4rem;
+        color: #ff8a3c;
+        animation: rotate-sway 2.2s ease-in-out infinite;
     }
-  }
+
+    #rotate-hint p {
+        margin: 0.8rem 0 0.3rem;
+        font-size: 1.25rem;
+        letter-spacing: 0.04em;
+    }
+
+    #rotate-hint span {
+        color: #8a8190;
+        font-size: 0.85rem;
+    }
+
+    #root {
+        display: none;
+    }
+}
+
+@keyframes rotate-sway {
+    0%, 100% { transform: rotate(-18deg); }
+    50% { transform: rotate(18deg); }
+}

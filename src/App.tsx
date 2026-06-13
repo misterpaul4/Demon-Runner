@@ -6,8 +6,7 @@ function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
 
     // Event emitted from the PhaserGame component
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const currentScene = (scene: Phaser.Scene) => {
+    const currentScene = (_scene: Phaser.Scene) => {
         //
     };
 

@@ -1,87 +1,93 @@
 import { Scene } from 'phaser';
-import settings from '../../utils/config';
+import config from '../../utils/config';
+import { Background } from '../world/Background';
+import { Button } from '../ui/Button';
 import { getUsers } from '../../utils/leaderBoardAPI';
 
 export class Rank extends Scene {
+    private background!: Background;
+
     constructor() {
         super('Rank');
     }
 
-    async create() {
-        this.add.image(400, 225, 'background');
-        const backBtn = this.add.image(80, 400, 'backBtn').setScale(0.2);
+    create() {
+        const cx = config.width / 2;
+        this.background = new Background(this);
 
-        backBtn.setInteractive();
-        backBtn.on('pointerup', () => {
-            this.scene.start('MainMenu');
+        this.add.text(cx, 92, 'TOP SOULS', {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '54px',
+            color: config.theme.css.parchment,
+            fontStyle: '900',
+        }).setOrigin(0.5).setShadow(0, 0, config.theme.css.ember, 18).setDepth(20);
+
+        const loading = this.add.text(cx, 360, 'consulting the ledger…', {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: '18px',
+            color: config.theme.css.ash,
+        }).setOrigin(0.5).setDepth(20);
+
+        new Button(this, cx, 660, 'Back', () => this.scene.start('MainMenu'), {
+            width: 220, height: 54, variant: 'ghost', fontSize: 18,
         });
 
-        this.add
-            .text(settings.gameWidth / 2, 100, `TOP ${settings.ranks} SCORES`, {
-                font: '25px Ariel',
-                color: '#ffffff',
-                fontStyle: 'bolder',
-            })
-            .setOrigin(0.5);
-
-        const loadingText = this.add
-            .text(settings.gameWidth / 2, 260, 'Loading...', {
-                font: '18px',
-                color: '#ffffff',
-            })
-            .setOrigin(0.5);
-
-            const multiplier = 25;
-
-        getUsers().then((record) => {
-            loadingText.destroy();
-
-            if (record) {
-                const sortedRecord = Object.fromEntries(
-                    Object.entries(record).sort((a, b) => b[1] - a[1])
-                );
-
-                let index = 0;
-                for (const user in sortedRecord) {
-                    this.add
-                        .text(
-                            settings.gameWidth / 2.6,
-                            multiplier * (index + 6),
-                            `${index + 1}`,
-                            {
-                                font: '15px Sans-serif',
-                                color: '#ffffff',
-                            },
-                        )
-                        .setOrigin(1, 0.5);
-
-                    this.add
-                        .text(
-                            settings.gameWidth / 2.6 + 10,
-                            multiplier * (index + 6),
-                            `${user === settings.username ? '\u{1F464}  ' : ''}${user}`,
-                            {
-                                font: '15px Sans-serif',
-                                color: '#ffffff',
-                            },
-                        )
-                        .setOrigin(0, 0.5);
-
-                    this.add
-                        .text(
-                            settings.gameWidth / 2.6 + 200,
-                            multiplier * (index + 6),
-                            `${user === settings.username ? `[ ${record[user]} ]`  : record[user]}`,
-                            {
-                                font: '15px Sans-serif',
-                                color: '#ffffff',
-                            },
-                        )
-                        .setOrigin(1, 0.5);
-
-                    index++;
+        getUsers()
+            .then((record) => {
+                // The player may have hit Back before Firebase answered.
+                if (!this.scene.isActive()) return;
+                loading.destroy();
+                if (!record || Object.keys(record).length === 0) {
+                    this.add.text(cx, 360, 'no souls have run yet', {
+                        fontFamily: 'Cinzel, Georgia, serif', fontSize: '18px', color: config.theme.css.ash,
+                    }).setOrigin(0.5).setDepth(20);
+                    return;
                 }
+                this.renderRows(record);
+            })
+            .catch(() => {
+                if (!this.scene.isActive()) return;
+                loading.setText('the ledger is sealed (offline)');
+            });
+    }
+
+    private renderRows(record: Record<string, number>) {
+        const cx = config.width / 2;
+        const rows = Object.entries(record).sort((a, b) => b[1] - a[1]).slice(0, config.ranks);
+        const top = 190;
+        const gap = 42;
+        const rowW = 560;
+
+        rows.forEach(([name, score], i) => {
+            const y = top + i * gap;
+            const mine = name === config.username;
+            const T = config.theme;
+
+            const bg = this.add.graphics().setDepth(15);
+            bg.fillStyle(mine ? T.emberDeep : 0x0c0a16, mine ? 0.35 : 0.4);
+            bg.fillRoundedRect(cx - rowW / 2, y - 16, rowW, 32, 8);
+            if (mine) {
+                bg.lineStyle(1.5, T.ember, 0.8);
+                bg.strokeRoundedRect(cx - rowW / 2, y - 16, rowW, 32, 8);
             }
+
+            const rankColor = i === 0 ? T.css.ember : i < 3 ? T.css.parchment : T.css.ash;
+            this.add.text(cx - rowW / 2 + 24, y, `${i + 1}`, {
+                fontFamily: 'Cinzel, Georgia, serif', fontSize: '18px', color: rankColor,
+            }).setOrigin(0, 0.5).setDepth(16);
+
+            this.add.text(cx - rowW / 2 + 78, y, mine ? `${name}  ·  you` : name, {
+                fontFamily: 'Cinzel, Georgia, serif', fontSize: '18px',
+                color: mine ? T.css.ember : T.css.parchment,
+            }).setOrigin(0, 0.5).setDepth(16);
+
+            this.add.text(cx + rowW / 2 - 24, y, `${score}`, {
+                fontFamily: 'Cinzel, Georgia, serif', fontSize: '18px', color: T.css.parchment,
+            }).setOrigin(1, 0.5).setDepth(16);
         });
+    }
+
+    update(time: number) {
+        this.background.update(time * 0.03, 0.5);
     }
 }

@@ -1,42 +1,41 @@
-import { Boot } from './scenes/Boot';
-import { GameOver } from './scenes/GameOver';
-import { Game as MainGame } from './scenes/Game';
-import { MainMenu } from './scenes/MainMenu';
-import { AUTO, Game } from 'phaser';
-import { Preloader } from './scenes/Preloader';
-import cg from '../utils/config';
-import '../../public/style.css';
-import { Rank } from './scenes/Rank';
+import { AUTO, Game, Scale } from 'phaser';
 
-const config: Phaser.Types.Core.GameConfig = {
+import { Boot } from './scenes/Boot';
+import { Preloader } from './scenes/Preloader';
+import { AudioBoot } from './scenes/AudioBoot';
+import { MainMenu } from './scenes/MainMenu';
+import { Game as MainGame } from './scenes/Game';
+import { GameOver } from './scenes/GameOver';
+import { Rank } from './scenes/Rank';
+import config from '../utils/config';
+import '../../public/style.css';
+
+const phaserConfig: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: cg.gameWidth,
-    height: cg.gameHeight,
+    width: config.width,
+    height: config.height,
     parent: 'game-container',
+    backgroundColor: '#05040a',
+    scale: {
+        mode: Scale.FIT,
+        autoCenter: Scale.CENTER_BOTH,
+        width: config.width,
+        height: config.height,
+    },
+    render: {
+        antialias: true,
+        roundPixels: false,
+    },
     physics: {
         default: 'arcade',
         arcade: {
-          gravity: {
-            y: cg.playerGravity,
-            x: 0
-          },
-          debug: true,
+            gravity: { x: 0, y: config.gravity },
+            debug: false,
         },
-      },
-    scene: [
-        Boot,
-        Preloader,
-        MainMenu,
-        MainGame,
-        GameOver,
-        Rank
-    ]
+    },
+    scene: [Boot, Preloader, AudioBoot, MainMenu, MainGame, GameOver, Rank],
 };
 
-const StartGame = (parent: string) => {
-
-    return new Game({ ...config, parent });
-
-}
+const StartGame = (parent: string) => new Game({ ...phaserConfig, parent });
 
 export default StartGame;

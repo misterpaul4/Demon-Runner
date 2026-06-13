@@ -1,38 +1,38 @@
 import { ref, get, orderByValue, query, limitToLast, set } from "firebase/database";
 import { firebaseDB } from "../main";
-import config from './config'
+import config from "./config";
 
+const ROOT = "demonRunner";
+
+// The caller decides whether this score is worth persisting (a new best); this
+// just writes it. Keeping the "is it a best?" decision in one place avoids the
+// trap of comparing against a config.bestScore the caller already bumped.
 const uploadScore = async (score: number) => {
-    if (score > config.bestScore) {
-        const scoresRef = ref(firebaseDB, `demonRunner/${config.username}`);
-        await set(scoresRef, score);
-        config.bestScore = score
-    }
-
-    return score
+    if (!firebaseDB || !config.username) return score;
+    await set(ref(firebaseDB, `${ROOT}/${config.username}`), score);
+    return score;
 };
 
 const getUsers = async (): Promise<Record<string, number> | undefined> => {
-    const scoresRef = ref(firebaseDB, "demonRunner/");
-
+    if (!firebaseDB) return undefined;
     try {
-        const snapshot = await get(query(scoresRef, orderByValue(), limitToLast(config.ranks)));
-        if (snapshot.exists()) {
-            return snapshot.val();
-        } else {
-            throw new Error("No data available");
-        }
+        const snapshot = await get(
+            query(ref(firebaseDB, ROOT), orderByValue(), limitToLast(config.ranks)),
+        );
+        return snapshot.exists() ? snapshot.val() : undefined;
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Could not read leaderboard:", error);
+        return undefined;
     }
 };
 
 const fetchUserBestScore = async () => {
-    const scoresRef = ref(firebaseDB, `demonRunner/${config.username}`);
-    const data = await get(scoresRef);
-
-    if (data.exists()) {
-        config.bestScore = data.val();
+    if (!firebaseDB || !config.username) return;
+    try {
+        const data = await get(ref(firebaseDB, `${ROOT}/${config.username}`));
+        if (data.exists()) config.bestScore = data.val();
+    } catch (error) {
+        console.error("Could not read best score:", error);
     }
 };
 

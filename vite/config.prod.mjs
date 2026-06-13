@@ -24,6 +24,12 @@ export default defineConfig({
         phasermsg()
     ],
     logLevel: 'warning',
+    preview: {
+        port: 8090,
+        host: true,
+        // Allow tunnelled hosts (ngrok, etc.) through Vite's host check.
+        allowedHosts: true
+    },
     build: {
         rollupOptions: {
             output: {
