@@ -1,10 +1,6 @@
 import Phaser from 'phaser';
 import config from '../../utils/config';
 
-// Every sprite in the game is drawn here at load time and baked into a texture,
-// so the project ships zero image files and the whole world stays on one
-// cohesive silhouette palette. Keys live in TEX so scenes never hard-code
-// strings.
 export const TEX = {
     glow: 'tex-glow',
     ember: 'tex-ember',
@@ -26,7 +22,6 @@ export const TEX = {
     spark: 'tex-spark',
 } as const;
 
-// The playable demon skins, in selector order. The default (Reaper) is first.
 export const DEMONS = [
     { id: 'reaper', name: 'The Reaper', tex: TEX.reaper },
     { id: 'fiend', name: 'The Fiend', tex: TEX.fiend },
@@ -52,8 +47,6 @@ function bake(scene: Phaser.Scene, key: string, w: number, h: number, draw: Draw
     g.destroy();
 }
 
-// Stacked translucent discs fake a radial gradient — denser in the middle,
-// feathered at the rim. Used for every soft light in the game.
 function radial(g: Phaser.GameObjects.Graphics, cx: number, cy: number, radius: number, color: number, strength = 0.07) {
     const steps = 26;
     for (let i = steps; i >= 1; i--) {
@@ -66,7 +59,6 @@ function buildLights(scene: Phaser.Scene) {
     bake(scene, TEX.glow, 128, 128, (g) => radial(g, 64, 64, 64, 0xffffff, 0.06));
     bake(scene, TEX.ember, 32, 32, (g) => radial(g, 16, 16, 16, 0xffffff, 0.12));
 
-    // A large, irregular field so the tiled sky doesn't read as a grid.
     bake(scene, TEX.star, 512, 512, (g) => {
         for (let i = 0; i < 150; i++) {
             const x = Math.random() * 512;
@@ -81,7 +73,6 @@ function buildLights(scene: Phaser.Scene) {
         radial(g, 120, 120, 118, 0xffe7c2, 0.04);
         g.fillStyle(0xf3e7cf, 1);
         g.fillCircle(120, 120, 78);
-        // A couple of dim craters break up the flat disc.
         g.fillStyle(0x000000, 0.06);
         g.fillCircle(104, 100, 16);
         g.fillCircle(140, 132, 11);
@@ -89,8 +80,6 @@ function buildLights(scene: Phaser.Scene) {
     });
 }
 
-// A jagged skyline strip. Endpoints share a height so it tiles seamlessly as a
-// TileSprite. `spikiness` leans the silhouette toward spires vs. rolling hills.
 function buildRidge(scene: Phaser.Scene, key: string, color: number, height: number, spikiness: number) {
     const w = 1024;
     bake(scene, key, w, height, (g) => {
@@ -107,7 +96,6 @@ function buildRidge(scene: Phaser.Scene, key: string, color: number, height: num
                 ? edge - (height * 0.4 + Math.random() * height * 0.3)
                 : edge - Math.random() * height * 0.22;
             if (spike) {
-                // A thin spire: rise to a point and drop straight back.
                 pts.push(x - 6, edge, x, y, x + 6, edge);
             } else {
                 pts.push(x, y);
@@ -128,21 +116,16 @@ function buildGround(scene: Phaser.Scene) {
     const w = 128;
     const h = 220;
     bake(scene, TEX.ground, w, h, (g) => {
-        // A touch above pure black so the demon's silhouette has something to
-        // contrast against where it runs.
         g.fillStyle(0x16101f, 1);
         g.fillRect(0, 0, w, h);
-        // Darken toward the bottom so the ground reads as receding into shadow.
         g.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.6, 0.6);
         g.fillRect(0, 0, w, h);
-        // Scattered speckles give the rock a little texture without a noise map.
         for (let i = 0; i < 26; i++) {
             g.fillStyle(0x140d22, Math.random() * 0.5);
             g.fillCircle(Math.random() * w, 20 + Math.random() * (h - 30), 1 + Math.random() * 2.5);
         }
     });
 
-    // A thin lit lip that runs along the top edge of every ground segment.
     bake(scene, TEX.groundEdge, w, 12, (g) => {
         g.fillStyle(T.ember, 0.9);
         g.fillRect(0, 4, w, 2);
@@ -155,9 +138,6 @@ function buildGround(scene: Phaser.Scene) {
     });
 }
 
-// Shared silhouette fill + cool rim light, the look that keeps every demon
-// legible against the dark world. All skins are drawn into a 120x130 box with
-// the body mass centred so they share one physics hitbox.
 function demonPoly(g: Phaser.GameObjects.Graphics, pts: [number, number][], fill = 0x2b2340) {
     const p = pts.map(([x, y]) => new Phaser.Geom.Point(x, y));
     g.fillStyle(fill, 1);
@@ -174,7 +154,6 @@ function demonEye(g: Phaser.GameObjects.Graphics, x: number, y: number, core = 0
     g.fillCircle(x, y, 1.8);
 }
 
-// Tall hooded figure, big back-swept horns, glowing eyes in the hood, torn hem.
 function drawReaper(g: Phaser.GameObjects.Graphics) {
     demonPoly(g, [[46, 44], [34, 22], [22, 6], [18, 5], [27, 17], [39, 35], [45, 43]]);
     demonPoly(g, [[74, 44], [86, 22], [98, 6], [102, 5], [93, 17], [81, 35], [75, 43]]);
@@ -189,7 +168,6 @@ function drawReaper(g: Phaser.GameObjects.Graphics) {
     demonEye(g, 66, 52, 0xffc878, T.ember);
 }
 
-// Hunched torso with spread bat wings, curved horns, two red eyes and fangs.
 function drawFiend(g: Phaser.GameObjects.Graphics) {
     demonPoly(g, [[52, 62], [24, 48], [10, 56], [24, 60], [12, 70], [28, 70], [18, 84], [38, 76], [50, 88]], 0x241d34);
     demonPoly(g, [[68, 62], [96, 48], [110, 56], [96, 60], [108, 70], [92, 70], [102, 84], [82, 76], [70, 88]], 0x241d34);
@@ -203,7 +181,6 @@ function drawFiend(g: Phaser.GameObjects.Graphics) {
     g.fillTriangle(61, 76, 63, 82, 65, 76);
 }
 
-// Broad-shouldered goat-headed demon, big curling ram horns, red slit eyes.
 function drawGoat(g: Phaser.GameObjects.Graphics) {
     demonPoly(g, [[56, 44], [40, 33], [23, 37], [15, 50], [28, 45], [41, 49], [34, 63], [49, 54], [57, 52]]);
     demonPoly(g, [[64, 44], [80, 33], [97, 37], [105, 50], [92, 45], [79, 49], [86, 63], [71, 54], [63, 52]]);
@@ -218,7 +195,6 @@ function drawGoat(g: Phaser.GameObjects.Graphics) {
     g.fillEllipse(74, 58, 6, 3);
 }
 
-// Low, hunched, forward-leaning beast with a spined back, forward horns, fangs.
 function drawBeast(g: Phaser.GameObjects.Graphics) {
     demonPoly(g, [[40, 72], [32, 53], [47, 67]], 0x241d34);
     demonPoly(g, [[51, 62], [43, 43], [59, 57]], 0x241d34);
@@ -242,8 +218,6 @@ function buildDemons(scene: Phaser.Scene) {
 }
 
 function buildBird(scene: Phaser.Scene) {
-    // Birds are the threat — lifted off black with a rim and a hot glowing eye so
-    // they're never lost against the sky or the ridges behind them.
     const ink = 0x2a2138;
     const rim = 0x5e4d77;
     bake(scene, TEX.birdBody, 64, 40, (g) => {
@@ -254,12 +228,10 @@ function buildBird(scene: Phaser.Scene) {
         const pts = body.map(([x, y]) => new Phaser.Geom.Point(x, y));
         g.fillStyle(ink, 1);
         g.fillPoints(pts, true);
-        // Tail fan.
         g.fillTriangle(6, 22, 0, 12, 4, 24);
         g.fillTriangle(6, 22, 0, 32, 4, 22);
         g.lineStyle(1.5, rim, 0.5);
         g.strokePoints(pts, true);
-        // Glowing blood eye.
         radial(g, 50, 16, 9, T.blood, 0.2);
         g.fillStyle(0xff6a5a, 1);
         g.fillCircle(50, 16, 3);
@@ -267,7 +239,6 @@ function buildBird(scene: Phaser.Scene) {
 
     bake(scene, TEX.birdWing, 56, 44, (g) => {
         g.fillStyle(ink, 1);
-        // Swept wing, anchored at the shoulder (top-right of the box).
         const wing: [number, number][] = [[52, 6], [30, 2], [6, 16], [22, 22], [4, 38], [34, 26], [48, 18]];
         g.fillPoints(wing.map(([x, y]) => new Phaser.Geom.Point(x, y)), true);
     });

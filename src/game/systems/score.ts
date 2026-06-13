@@ -1,8 +1,5 @@
 import config from '../../utils/config';
 
-// Distance is the backbone of the score; grazes and soul pickups feed a combo
-// multiplier that decays if the player stops taking risks. The headline number
-// is metres survived plus whatever bonus the multiplier banked.
 export class Score {
     private bonus = 0;
     private multiplier = 1;
@@ -46,7 +43,6 @@ export class Score {
         return this.multiplier;
     }
 
-    // 0..1 of how much combo time is left, for a draining HUD ring.
     comboRemaining(time: number) {
         if (this.multiplier <= 1) return 0;
         return Math.max(0, 1 - (time - this.lastEventAt) / config.combo.windowMs);

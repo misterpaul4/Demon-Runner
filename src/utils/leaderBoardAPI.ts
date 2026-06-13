@@ -4,9 +4,6 @@ import config from "./config";
 
 const ROOT = "demonRunner";
 
-// The caller decides whether this score is worth persisting (a new best); this
-// just writes it. Keeping the "is it a best?" decision in one place avoids the
-// trap of comparing against a config.bestScore the caller already bumped.
 const uploadScore = async (score: number) => {
     if (!firebaseDB || !config.username) return score;
     await set(ref(firebaseDB, `${ROOT}/${config.username}`), score);

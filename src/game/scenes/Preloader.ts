@@ -38,15 +38,10 @@ export class Preloader extends Scene {
     }
 
     preload() {
-        // Only the procedurally generated art is needed before the menu. Audio
-        // is handled by the AudioBoot scene, which runs in parallel so a slow or
-        // stalled audio load can never hold up the menu.
         buildTextures(this);
     }
 
     async create() {
-        // Give the display font a moment to arrive (it's baked into text at
-        // creation), but never wait on it indefinitely.
         await Promise.race([this.loadFonts(), this.delay(2000)]);
         this.scene.launch('AudioBoot');
         this.scene.start('MainMenu');
@@ -62,7 +57,6 @@ export class Preloader extends Scene {
         try {
             await Promise.all([fonts.load('700 40px Cinzel'), fonts.load('400 20px Cinzel')]);
         } catch {
-            // Serif fallback is fine if the font CDN is unreachable.
         }
     }
 }

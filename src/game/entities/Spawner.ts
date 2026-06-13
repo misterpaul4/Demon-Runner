@@ -3,8 +3,6 @@ import config from '../../utils/config';
 import { Bird, BirdKind, unlockedKinds } from './Bird';
 import { Difficulty } from '../systems/difficulty';
 
-// Owns the bird pool and decides when and what to throw at the player. Spawn
-// cadence tightens with distance, and the kind pool widens as thresholds unlock.
 export class Spawner {
     readonly group: Phaser.GameObjects.Group;
     private scene: Phaser.Scene;
@@ -29,7 +27,6 @@ export class Spawner {
     private chooseKind(metres: number): BirdKind {
         const pool = unlockedKinds(metres);
         let kind = Phaser.Utils.Array.GetRandom(pool) as BirdKind;
-        // Avoid two divers in a row — back-to-back swoops feel cheap.
         if (kind === 'diver' && this.lastKind === 'diver' && pool.length > 1) {
             kind = Phaser.Utils.Array.GetRandom(pool.filter((k) => k !== 'diver')) as BirdKind;
         }

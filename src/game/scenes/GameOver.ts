@@ -76,7 +76,6 @@ export class GameOver extends Scene {
             width: 200, height: 58, variant: 'ghost', fontSize: 20,
         });
 
-        // Entrance: card drops in, score number punches up.
         panel.setScale(0.92).setAlpha(0);
         this.tweens.add({ targets: panel, scale: 1, alpha: 1, duration: 240, ease: 'Back.easeOut' });
 

@@ -9,13 +9,6 @@ type Segment = {
     right: number;
 };
 
-// Emits the running surface as a ribbon of segments separated by gaps. Segments
-// scroll past with the camera; once one falls behind it's recycled out ahead,
-// so the run is effectively endless on a fixed pool of objects.
-//
-// Collision rides on an invisible static image per segment (top-left origin so
-// its top lands exactly on groundTop), while the lit look is a pair of tiled
-// sprites layered on top.
 export class Ground {
     readonly group: Phaser.Physics.Arcade.StaticGroup;
     private scene: Phaser.Scene;
@@ -27,8 +20,6 @@ export class Ground {
         this.scene = scene;
         this.group = scene.physics.add.staticGroup();
 
-        // A long, gap-free opening stretch that also reaches well left of the
-        // spawn point so the view is never short of ground at the start.
         this.addSegment(-1200, 2600);
         this.cursor = 1400;
     }

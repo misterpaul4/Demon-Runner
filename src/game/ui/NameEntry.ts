@@ -3,10 +3,6 @@ import config from '../../utils/config';
 
 const MAX_LEN = 12;
 
-// In-canvas name field. A hidden DOM input does the actual capture — that's what
-// lets a phone's soft keyboard appear on tap — while everything the player sees
-// is drawn on the canvas, so there's no stray HTML form floating over the game
-// like the v2 build had.
 export class NameEntry {
     private scene: Phaser.Scene;
     private input: HTMLInputElement;
@@ -108,7 +104,6 @@ export class NameEntry {
         this.input.focus();
     }
 
-    // Nudge + redden the field to tell the player the name is required.
     flash() {
         this.scene.tweens.add({
             targets: this.container,

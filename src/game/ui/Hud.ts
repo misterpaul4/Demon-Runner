@@ -2,9 +2,6 @@ import Phaser from 'phaser';
 import config from '../../utils/config';
 import { Score } from '../systems/score';
 
-// The in-run readout: score and best on the left, a combo badge that only shows
-// up once the player is actually chaining risks. Everything is pinned to the
-// camera so it sits still while the world scrolls underneath.
 export class Hud {
     private scene: Phaser.Scene;
     private scoreText: Phaser.GameObjects.Text;

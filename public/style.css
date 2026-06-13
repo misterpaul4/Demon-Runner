@@ -28,8 +28,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* A faint ember vignette behind the letterboxed canvas so the bars read as
-       part of the world rather than dead black. */
     background:
         radial-gradient(120% 80% at 50% 0%, #1a0c1e 0%, #05040a 60%),
         #05040a;
@@ -44,8 +42,6 @@ canvas {
     display: none;
 }
 
-/* On a portrait phone the 16:9 play area shrinks to a thin band, so prompt the
-   player to rotate rather than squinting at a letterboxed sliver. */
 @media (orientation: portrait) and (max-width: 900px) {
     #rotate-hint {
         position: fixed;

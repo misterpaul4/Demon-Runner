@@ -2,8 +2,6 @@ import Phaser from 'phaser';
 import config from '../../utils/config';
 import { TEX } from './art';
 
-// A one-shot scatter of feathers and embers — fired on near-misses and the
-// killing blow. The emitter cleans itself up once the burst has faded.
 export function burst(scene: Phaser.Scene, x: number, y: number, count = 10, hot = false) {
     const feathers = scene.add.particles(x, y, TEX.feather, {
         lifespan: { min: 400, max: 900 },
@@ -35,8 +33,6 @@ export function burst(scene: Phaser.Scene, x: number, y: number, count = 10, hot
     });
 }
 
-// Dark frame fading inward, pinned to the camera. Sells the gothic mood and
-// keeps the eye on the action in the middle of the screen.
 export function vignette(scene: Phaser.Scene) {
     const w = config.width;
     const h = config.height;

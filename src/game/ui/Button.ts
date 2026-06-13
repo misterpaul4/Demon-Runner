@@ -10,8 +10,6 @@ interface ButtonOpts {
     fontSize?: number;
 }
 
-// A self-contained menu button drawn with vector graphics — no button PNGs like
-// the old build. Handles its own hover/press feedback and fires `onClick`.
 export class Button extends Phaser.GameObjects.Container {
     private bg: Phaser.GameObjects.Graphics;
     private label: Phaser.GameObjects.Text;

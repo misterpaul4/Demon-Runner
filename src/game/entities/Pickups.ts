@@ -42,8 +42,6 @@ class Soul extends Phaser.Physics.Arcade.Image {
     }
 }
 
-// Drifting souls to harvest. They tend to hang above the running lane so the
-// reward usually costs the player a jump into bird territory.
 export class Pickups {
     readonly group: Phaser.GameObjects.Group;
     private scene: Phaser.Scene;
@@ -80,7 +78,6 @@ export class Pickups {
     }
 
     private spawnCluster(x: number) {
-        // Either a single low soul or a short rising arc that pays off a jump.
         const arc = Math.random() < 0.45;
         const count = arc ? 3 : 1;
         const topY = Phaser.Math.Between(runLane - 150, runLane - 60);

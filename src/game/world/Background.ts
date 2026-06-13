@@ -15,9 +15,6 @@ function lerpColor(a: number, b: number, t: number) {
     return (r << 16) | (g << 8) | bl;
 }
 
-// The full sky-to-ridge backdrop. Everything here is pinned to the camera and
-// scrolled by hand so the depth layers drift at different rates (parallax),
-// while `setProgress` bleeds the palette from dusk through night into blood-red.
 export class Background {
     private scene: Phaser.Scene;
     private sky: Phaser.GameObjects.Graphics;
@@ -53,8 +50,6 @@ export class Background {
         this.ridgeMid = this.makeRidge(TEX.ridgeMid, horizon, -70, 300);
         this.ridgeNear = this.makeRidge(TEX.ridgeNear, horizon, -60, 380);
 
-        // The abyss below the running line, so gaps (and the world edge at the
-        // start) read as a dark pit rather than the maroon horizon behind them.
         scene.add
             .rectangle(0, horizon, w, h - horizon + 4, config.theme.ink, 1)
             .setOrigin(0, 0)
@@ -73,7 +68,6 @@ export class Background {
     }
 
     update(scrollX: number, progress: number) {
-        // Nearer layers slide faster; the moon barely creeps.
         this.ridgeFar.tilePositionX = scrollX * 0.04;
         this.ridgeMid.tilePositionX = scrollX * 0.1;
         this.ridgeNear.tilePositionX = scrollX * 0.22;
@@ -107,7 +101,6 @@ export class Background {
         this.sky.fillGradientStyle(top, top, bottom, bottom, 1);
         this.sky.fillRect(0, 0, config.width, config.height);
 
-        // Stars peak at deep night, then wash out under the blood sky.
         this.stars.setAlpha(Phaser.Math.Clamp(0.7 - Math.abs(p - 0.5) * 1.0, 0.12, 0.7));
         this.moon.setTint(lerpColor(config.theme.moon, config.theme.bloodMoon, Phaser.Math.Clamp((p - 0.4) / 0.6, 0, 1)));
         this.moon.y = 150 - p * 30;

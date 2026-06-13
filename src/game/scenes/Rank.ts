@@ -34,7 +34,6 @@ export class Rank extends Scene {
 
         getUsers()
             .then((record) => {
-                // The player may have hit Back before Firebase answered.
                 if (!this.scene.isActive()) return;
                 loading.destroy();
                 if (!record || Object.keys(record).length === 0) {

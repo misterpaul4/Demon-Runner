@@ -1,10 +1,5 @@
 import { Scene } from 'phaser';
 
-// Audio loads here, in a scene that runs in parallel with the menu and game
-// rather than gating either of them. If decoding stalls (a locked AudioContext,
-// a slow or flaky connection) the rest of the game is unaffected — sound simply
-// comes online whenever this finishes. Keys land in the global cache, so every
-// other scene can play them once loaded.
 export class AudioBoot extends Scene {
     constructor() {
         super('AudioBoot');

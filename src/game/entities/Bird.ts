@@ -14,8 +14,6 @@ type KindSpec = {
 
 const runLane = config.groundTop - 44;
 
-// Each kind reads as a different threat: the crow blocks the lane, the floater
-// rides high enough to run under, and the diver peels down out of the sky.
 const KINDS: Record<BirdKind, KindSpec> = {
     crow: {
         speed: 250,
@@ -50,9 +48,6 @@ export function unlockedKinds(metres: number): BirdKind[] {
     return (Object.keys(KINDS) as BirdKind[]).filter((k) => metres >= KINDS[k].unlock);
 }
 
-// A pooled enemy. The body is the collider; a single wing overlay flaps for life.
-// Birds live in world space and slide left while the demon runs right, so the
-// two close on each other.
 export class Bird extends Phaser.Physics.Arcade.Sprite {
     kind: BirdKind = 'crow';
     grazed = false;
@@ -71,7 +66,6 @@ export class Bird extends Phaser.Physics.Arcade.Sprite {
         (this.body as Phaser.Physics.Arcade.Body).setSize(40, 22).setOffset(14, 9);
 
         this.wing = scene.add.image(-999, -999, TEX.birdWing).setOrigin(0.1, 0.2).setFlipX(true).setDepth(5);
-        // A blood-red aura so an incoming bird is never lost against the sky.
         this.glow = scene.add.image(-999, -999, TEX.glow)
             .setBlendMode(Phaser.BlendModes.ADD)
             .setTint(config.theme.blood)
@@ -108,7 +102,6 @@ export class Bird extends Phaser.Physics.Arcade.Sprite {
     advance(_time: number, delta: number) {
         if (!this.active) return;
 
-        // Divers ease toward the running lane; everyone else just bobs a touch.
         if (this.kind === 'diver') {
             this.y = Phaser.Math.Linear(this.y, this.targetY, 0.018);
         } else if (this.kind === 'floater') {

@@ -53,10 +53,6 @@ export class Game extends Scene {
         vignette(this);
         this.hud = new Hud(this);
 
-        // Bounds whose height equals the viewport pin vertical scroll to exactly
-        // 0, so the world-space ground always lines up with the screen-pinned
-        // ridges. The horizontal range is effectively unbounded for the endless
-        // run. (lerpY alone wasn't enough — the camera still crept vertically.)
         const cam = this.cameras.main;
         cam.setBounds(-100000, 0, 200000, config.height);
         cam.startFollow(this.player.sprite, true, 0.12, 0.12);
@@ -106,7 +102,6 @@ export class Game extends Scene {
         });
     }
 
-    // A few slow embers drifting up across the view, locked to the camera.
     private ambientEmbers() {
         this.add.particles(0, 0, 'tex-ember', {
             x: { min: 0, max: config.width },
@@ -173,8 +168,6 @@ export class Game extends Scene {
             this.score.update(time);
             this.hud.update(this.score, time);
 
-            // A momentary velocity dip at a segment seam shouldn't be fatal, so a
-            // wall only counts once the demon has been stalled for a beat.
             const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
             this.stallMs = body.velocity.x < Difficulty.runSpeed(this.metres) * 0.4 ? this.stallMs + delta : 0;
             const fellInGap = this.player.y > config.groundTop + 220;

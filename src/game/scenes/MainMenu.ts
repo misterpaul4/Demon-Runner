@@ -132,8 +132,6 @@ export class MainMenu extends Scene {
     }
 
     private play() {
-        // Strip characters Firebase forbids in a database key (. # $ [ ] /) so
-        // the name can be used directly as the leaderboard key.
         const name = this.nameEntry.value.toLowerCase().replace(/[.#$[\]/]/g, '').trim();
         if (!name) {
             this.nameEntry.flash();

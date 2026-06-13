@@ -2,13 +2,6 @@ import Phaser from 'phaser';
 import config from '../../utils/config';
 import { TEX, demonTex } from '../systems/art';
 
-// The demon. Physics lives on an invisible sprite (`sprite`) while the look — the
-// chosen demon skin plus an ember wake — rides on a separate container that
-// mirrors the body each frame. Splitting the two lets the visual tilt, squash
-// and trail react to motion without fighting the collider.
-//
-// Emits: 'jump', 'airjump', 'land' (with impact velocity) for the scene to hang
-// sound and screen-shake off of.
 export class Player extends Phaser.Events.EventEmitter {
     readonly sprite: Phaser.Physics.Arcade.Sprite;
     private scene: Phaser.Scene;
@@ -27,8 +20,6 @@ export class Player extends Phaser.Events.EventEmitter {
         super();
         this.scene = scene;
 
-        // All skins share one 120x130 frame, so the hitbox is identical whichever
-        // demon the player picked.
         const skin = demonTex(config.character);
         this.sprite = scene.physics.add.sprite(x, y, skin).setVisible(false);
         this.arcade = this.sprite.body as Phaser.Physics.Arcade.Body;
@@ -38,7 +29,6 @@ export class Player extends Phaser.Events.EventEmitter {
         this.sprite.setMaxVelocity(2400, 2600);
         this.sprite.setVelocityX(this.runSpeed);
 
-        // A soft ember aura that keeps the demon legible against the dark world.
         this.glow = scene.add.image(x, y, TEX.glow)
             .setBlendMode(Phaser.BlendModes.ADD)
             .setTint(config.theme.ember)
@@ -84,7 +74,6 @@ export class Player extends Phaser.Events.EventEmitter {
         this.jumpBufferedAt = this.scene.time.now;
     }
 
-    // Releasing mid-rise clips upward speed, so a tap hops and a hold soars.
     releaseJump() {
         if (!this.alive) return;
         if (this.arcade.velocity.y < 0) {
@@ -149,14 +138,11 @@ export class Player extends Phaser.Events.EventEmitter {
                 this.doJump();
             }
 
-            // Keep driving forward unless a gap wall is in the way — that stall is
-            // what the scene reads as death.
             if (!ab.blocked.right && !ab.touching.right) {
                 this.sprite.setVelocityX(this.runSpeed);
             }
         }
 
-        // Lean into the arc: nose up while rising, tipping forward on the fall.
         const targetTilt = Phaser.Math.Clamp(ab.velocity.y * 0.022, -16, 24);
         this.rig.angle = Phaser.Math.Linear(this.rig.angle, targetTilt, 0.18);
 

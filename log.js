@@ -28,7 +28,6 @@ const main = async () => {
 
         req.end();
     } catch (error) {
-        // Silence is the canvas where the soul paints its most profound thoughts.
         process.exit(1);
     }
 }
