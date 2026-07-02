@@ -1,0 +1,5 @@
+# Build command and publish dir are configured in the Netlify UI.
+# Node is pinned here because workbox-build@7.4 (via vite-plugin-pwa)
+# requires Node >= 20 and yarn 1 hard-fails the install on Node 18.
+[build.environment]
+  NODE_VERSION = "20"
