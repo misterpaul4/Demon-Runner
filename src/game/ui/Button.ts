@@ -45,14 +45,12 @@ export class Button extends Phaser.GameObjects.Container {
         this.draw();
 
         this.setSize(this.boxW, this.boxH);
-        // hit area is padded past the visible box — fingers are not cursors
+        // hit area is padded past the visible box — fingers are not cursors.
+        // NOTE: container hit areas are tested in top-left space (Phaser adds
+        // displayOrigin = size/2 to the local point), so the rect starts at
+        // (-pad, -pad), NOT at (-w/2 - pad, -h/2 - pad)
         this.setInteractive(
-            new Phaser.Geom.Rectangle(
-                -this.boxW / 2 - 14,
-                -this.boxH / 2 - 12,
-                this.boxW + 28,
-                this.boxH + 24,
-            ),
+            new Phaser.Geom.Rectangle(-14, -12, this.boxW + 28, this.boxH + 24),
             Phaser.Geom.Rectangle.Contains,
         );
         if (this.input) this.input.cursor = 'pointer';
