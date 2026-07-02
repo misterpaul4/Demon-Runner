@@ -45,7 +45,17 @@ export class Button extends Phaser.GameObjects.Container {
         this.draw();
 
         this.setSize(this.boxW, this.boxH);
-        this.setInteractive({ useHandCursor: true });
+        // hit area is padded past the visible box — fingers are not cursors
+        this.setInteractive(
+            new Phaser.Geom.Rectangle(
+                -this.boxW / 2 - 14,
+                -this.boxH / 2 - 12,
+                this.boxW + 28,
+                this.boxH + 24,
+            ),
+            Phaser.Geom.Rectangle.Contains,
+        );
+        if (this.input) this.input.cursor = 'pointer';
 
         this.on('pointerover', () => {
             this.hovered = true;

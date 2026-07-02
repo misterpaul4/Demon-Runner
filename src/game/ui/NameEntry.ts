@@ -12,11 +12,11 @@ export class NameEntry {
     private caret: Phaser.GameObjects.Rectangle;
     private focused = false;
     private width: number;
-    private height = 58;
+    private height = 72;
 
     constructor(scene: Phaser.Scene, x: number, y: number, initial = '', onSubmit?: () => void) {
         this.scene = scene;
-        this.width = 380;
+        this.width = 420;
 
         this.input = document.createElement('input');
         this.input.type = 'text';
@@ -41,10 +41,10 @@ export class NameEntry {
         this.bg = scene.add.graphics();
         this.valueText = scene.add.text(-this.width / 2 + 22, 0, '', {
             fontFamily: 'Cinzel, Georgia, serif',
-            fontSize: '24px',
+            fontSize: '26px',
             color: config.theme.css.parchment,
         }).setOrigin(0, 0.5);
-        this.caret = scene.add.rectangle(0, 0, 2, 26, 0xff8a3c).setOrigin(0, 0.5).setAlpha(0);
+        this.caret = scene.add.rectangle(0, 0, 2, 30, 0xff8a3c).setOrigin(0, 0.5).setAlpha(0);
 
         this.container = scene.add
             .container(x, y, [this.bg, this.valueText, this.caret])
