@@ -45,12 +45,21 @@ const fromStorage = {
     character: localStorage.getItem(STORAGE_KEYS.character) ?? 'reaper',
 };
 
+// Fill the device's aspect ratio instead of letterboxing a fixed 16:9 canvas.
+// Height stays 720 (all vertical layout hangs off it); width stretches to match
+// the screen, clamped so ultra-wide devices don't gain an unfair lookahead.
+const deviceAspect = typeof window !== 'undefined' && window.innerHeight > 0
+    ? window.innerWidth / window.innerHeight
+    : 16 / 9;
+const landscapeAspect = deviceAspect >= 1 ? deviceAspect : 1 / deviceAspect;
+const gameWidth = Math.min(1600, Math.max(1280, Math.round(720 * landscapeAspect)));
+
 const config = {
     storageKeys: STORAGE_KEYS,
     theme,
     skyPhases,
 
-    width: 1280,
+    width: gameWidth,
     height: 720,
 
     groundTop: 600,

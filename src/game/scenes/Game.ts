@@ -10,6 +10,7 @@ import { Hud } from '../ui/Hud';
 import { Score } from '../systems/score';
 import { Difficulty } from '../systems/difficulty';
 import { applyMute, sfx } from '../systems/audio';
+import { buzz } from '../systems/haptics';
 import { burst, shake, vignette } from '../systems/fx';
 import { uploadScore } from '../../utils/leaderBoardAPI';
 
@@ -28,7 +29,9 @@ export class Game extends Scene {
     private startX = 0;
     private metres = 0;
     private pointerStartY = 0;
+    private swipeConsumed = false;
     private stallMs = 0;
+    private wakeLock: { release(): Promise<void> } | null = null;
 
     constructor() {
         super('Game');
@@ -65,19 +68,44 @@ export class Game extends Scene {
         this.bindFeedback();
         this.bindInput();
 
+        this.acquireWakeLock();
+        this.events.once('shutdown', () => this.releaseWakeLock());
+
         EventBus.emit('current-scene-ready', this);
     }
 
+    // keep the screen awake during a run — mobile screens dim on tap-only input
+    private async acquireWakeLock() {
+        try {
+            const nav = navigator as Navigator & {
+                wakeLock?: { request(type: 'screen'): Promise<{ release(): Promise<void> }> };
+            };
+            this.wakeLock = (await nav.wakeLock?.request('screen')) ?? null;
+        } catch {
+            this.wakeLock = null;
+        }
+    }
+
+    private releaseWakeLock() {
+        this.wakeLock?.release().catch(() => {});
+        this.wakeLock = null;
+    }
+
     private bindFeedback() {
-        this.player.on('jump', () => sfx(this, 'sfx-jump', 0.5));
+        this.player.on('jump', () => {
+            sfx(this, 'sfx-jump', 0.5);
+            buzz(8);
+        });
         this.player.on('airjump', () => {
             sfx(this, 'sfx-jump', 0.4);
             shake(this, 0.003, 90);
+            buzz(12);
         });
         this.player.on('land', (impact: number) => {
             if (impact > 700) {
                 sfx(this, 'sfx-land', 0.4);
                 shake(this, 0.004, 110);
+                buzz(16);
             }
         });
     }
@@ -94,10 +122,21 @@ export class Game extends Scene {
 
         this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
             this.pointerStartY = p.y;
+            this.swipeConsumed = false;
             if (this.state === 'run') this.player.pressJump();
         });
-        this.input.on('pointerup', (p: Phaser.Input.Pointer) => {
-            if (p.y - this.pointerStartY > 70) this.player.fastFall();
+        // fast-fall fires the instant the swipe crosses the threshold —
+        // detecting it on pointerup (when the finger lifts) reads as input lag
+        this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
+            if (!p.isDown || this.swipeConsumed || this.state !== 'run') return;
+            if (p.y - this.pointerStartY > 60) {
+                this.swipeConsumed = true;
+                this.player.releaseJump();
+                this.player.fastFall();
+                buzz(10);
+            }
+        });
+        this.input.on('pointerup', () => {
             this.player.releaseJump();
         });
     }
@@ -134,6 +173,7 @@ export class Game extends Scene {
         this.pickups.collect(soul as Phaser.GameObjects.GameObject);
         this.score.registerPickup(this.time.now);
         sfx(this, 'sfx-jump', 0.25);
+        buzz(6);
     };
 
     private checkGrazes(time: number) {
@@ -178,8 +218,10 @@ export class Game extends Scene {
     private die() {
         this.state = 'dead';
         this.player.kill();
+        this.releaseWakeLock();
         sfx(this, 'sfx-over', 0.6);
         shake(this, 0.012, 360);
+        buzz([40, 50, 80]);
         burst(this, this.player.x, this.player.y, 18, true);
 
         const finalScore = this.score.value;

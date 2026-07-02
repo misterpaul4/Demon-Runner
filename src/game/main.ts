@@ -25,6 +25,12 @@ const phaserConfig: Phaser.Types.Core.GameConfig = {
     render: {
         antialias: true,
         roundPixels: false,
+        powerPreference: 'high-performance',
+    },
+    input: {
+        // default is a single touch pointer — a second finger tapping while the
+        // first is still down would be silently dropped
+        activePointers: 3,
     },
     physics: {
         default: 'arcade',

@@ -137,9 +137,24 @@ export class MainMenu extends Scene {
             this.nameEntry.flash();
             return;
         }
+        this.requestFullscreen();
         config.username = name;
         localStorage.setItem(config.storageKeys.username, name);
         fetchUserBestScore().finally(() => this.scene.start('Game'));
+    }
+
+    // in the browser (pre-install) the address bar eats screen space — go
+    // fullscreen on touch devices when the run starts. No-op when already
+    // fullscreen (installed PWA) or unsupported (iOS Safari).
+    private requestFullscreen() {
+        const isTouch = this.sys.game.device.input.touch;
+        const standalone = window.matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+        if (!isTouch || standalone || !this.scale.fullscreen.available || this.scale.isFullscreen) return;
+        try {
+            this.scale.startFullscreen();
+        } catch {
+            // fullscreen denied — the game still works, just with browser chrome
+        }
     }
 
     update(time: number) {
