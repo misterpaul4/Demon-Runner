@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { NameEntry } from '../ui/NameEntry';
 import { applyMute, toggleSound } from '../systems/audio';
 import { fetchUserBestScore } from '../../utils/leaderBoardAPI';
+import { installAvailable, onInstallAvailability, promptInstall } from '../../utils/installPrompt';
 
 export class MainMenu extends Scene {
     private background!: Background;
@@ -15,6 +16,8 @@ export class MainMenu extends Scene {
     private demonName!: Phaser.GameObjects.Text;
     private nameEntry!: NameEntry;
     private soundBtn!: Button;
+    private installBtn: Button | null = null;
+    private offInstall?: () => void;
     private demonBaseY = 296;
 
     constructor() {
@@ -61,8 +64,32 @@ export class MainMenu extends Scene {
             this.scene.restart();
         }, { width: 168, height: 46, variant: 'ghost', fontSize: 15 });
 
-        this.events.once('shutdown', () => this.nameEntry.destroy());
+        this.buildInstallButton(cx);
+
+        this.events.once('shutdown', () => {
+            this.nameEntry.destroy();
+            this.offInstall?.();
+            this.offInstall = undefined;
+            this.installBtn = null;
+        });
         EventBus.emit('current-scene-ready', this);
+    }
+
+    // shown only when the browser reports the PWA is installable —
+    // tapping it replays the native install dialog
+    private buildInstallButton(cx: number) {
+        const sync = (available: boolean) => {
+            if (available && !this.installBtn) {
+                this.installBtn = new Button(this, cx, 668, 'Install App', () => promptInstall(), {
+                    width: 220, height: 46, variant: 'ghost', fontSize: 15,
+                });
+            } else if (!available && this.installBtn) {
+                this.installBtn.destroy();
+                this.installBtn = null;
+            }
+        };
+        sync(installAvailable());
+        this.offInstall = onInstallAvailability(sync);
     }
 
     private soundLabel() {
